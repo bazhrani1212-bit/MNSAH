@@ -54,15 +54,17 @@
   <div class="err" id="errBox"></div>
 
   <div class="card">
-    <button class="btn gray" id="goHomeBtn">العودة للنماذج</button>
-    <button class="btn" id="loadBtn">تحميل النتائج</button>
-    <button class="btn gray" id="exportBtn">تصدير CSV</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn gray" id="goHomeBtn">العودة للنماذج</button>
+      <button class="btn" id="loadBtn">تحميل النتائج</button>
+      <button class="btn gray" id="exportBtn">تصدير CSV</button>
+      <button class="btn danger" id="logoutBtn">خروج</button>
+    </div>
     <div class="hint" id="statusLine" style="margin-top:10px;">جاهز</div>
   </div>
 
   <div class="card">
     <div class="row">
-      <div><label class="hint">Admin Token</label><input id="tokenInput" placeholder="مثل: B36-Admin2026"></div>
       <div>
         <label class="hint">النوع</label>
         <select id="typeFilter">
@@ -74,10 +76,17 @@
           <option value="student_teacher_satisfaction">رضا الطالب عن المعلم</option>
         </select>
       </div>
-      <div><label class="hint">بحث</label><input id="searchText" placeholder="برنامج/أثر/ملاحظات…"></div>
+      <div>
+        <label class="hint">بحث</label>
+        <input id="searchText" autocomplete="off" />
+      </div>
       <div>
         <label class="hint">الحد</label>
         <select id="limitSel"><option>200</option><option selected>500</option><option>1000</option><option>2000</option></select>
+      </div>
+      <div>
+        <label class="hint">تحديث سريع</label>
+        <button class="btn gray" type="button" id="refreshBtn">تحديث</button>
       </div>
     </div>
   </div>
@@ -120,7 +129,14 @@
 </div>
 
 <script>
+/** رابط Web App (الجديد) */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy098HrSJ1vqA_xNQQal3lCD6Z1-S0vi2Q8_XNVPKNH8B_TQZZiskueR99RwjGjncC/exec";
+
+/** SessionKey إلزامي */
+const sessionKey = localStorage.getItem("adminSessionKey") || "";
+if(!sessionKey){
+  window.location.href = "./";
+}
 
 const okBox = document.getElementById("okBox");
 const errBox = document.getElementById("errBox");
@@ -186,9 +202,6 @@ function loadJSONP(url, cbName){
 }
 
 async function loadFromSheet(){
-  const token = document.getElementById("tokenInput").value.trim();
-  if(!token){ showErr("ضعي Admin Token"); return; }
-
   const type = document.getElementById("typeFilter").value.trim();
   const q = document.getElementById("searchText").value.trim();
   const limit = document.getElementById("limitSel").value;
@@ -196,7 +209,7 @@ async function loadFromSheet(){
   const cbName = "cb_" + Math.random().toString(16).slice(2);
   const u = new URL(APPS_SCRIPT_URL);
   u.searchParams.set("action","list");
-  u.searchParams.set("token", token);
+  u.searchParams.set("sessionKey", sessionKey);
   u.searchParams.set("limit", limit);
   if(type) u.searchParams.set("type", type);
   if(q) u.searchParams.set("q", q);
@@ -205,8 +218,8 @@ async function loadFromSheet(){
   try{
     const json = await loadJSONP(u.toString(), cbName);
     if(!json.ok){
-      if(json.error==="UNAUTHORIZED"){ showErr("توكن غير صحيح"); return; }
-      showErr(json.error||"فشل التحميل"); return;
+      showErr("انتهت الجلسة أو لا توجد صلاحية. أعيدي الدخول من الصفحة الرئيسية.");
+      return;
     }
     allData = json.data || [];
     render();
@@ -214,7 +227,7 @@ async function loadFromSheet(){
     showOk("تم التحميل ✅");
   }catch(e){
     console.error(e);
-    showErr("تعذر تحميل النتائج (تأكدي من Deploy Anyone)");
+    showErr("تعذر تحميل النتائج. تأكدي من النشر Anyone وأن الرابط صحيح.");
   }
 }
 
@@ -271,7 +284,6 @@ document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && backdrop.style
 function openModal(x){
   currentItem = x;
   modalTitle.textContent = `استجابة — ${fmtType(x.type)} — ${x.createdAt||""}`;
-
   deleteBtn.style.display = x?.id ? "inline-block" : "none";
 
   const answers = typeof x.answers==="string" ? safeJson(x.answers) : x.answers;
@@ -307,7 +319,6 @@ function openModal(x){
       ${formHtml || `<div class="hint">لا توجد إجابات.</div>`}
     `}
   `;
-
   backdrop.style.display="flex";
 }
 
@@ -319,31 +330,25 @@ function closeModal(){
 
 /** Delete */
 deleteBtn.addEventListener("click", async ()=>{
-  const token = document.getElementById("tokenInput").value.trim();
-  if(!token){ showErr("ضعي Admin Token"); return; }
   if(!currentItem?.id) return;
-
   if(!confirm("هل تريدين حذف هذه الاستجابة؟")) return;
 
   const cbName = "cb_del_" + Math.random().toString(16).slice(2);
   const u = new URL(APPS_SCRIPT_URL);
   u.searchParams.set("action","delete");
-  u.searchParams.set("token", token);
+  u.searchParams.set("sessionKey", sessionKey);
   u.searchParams.set("id", currentItem.id);
   u.searchParams.set("callback", cbName);
 
   try{
     const json = await loadJSONP(u.toString(), cbName);
-    if(!json.ok){
-      showErr(json.error || "فشل الحذف");
-      return;
-    }
+    if(!json.ok){ showErr(json.error || "فشل الحذف"); return; }
     showOk("تم حذف الاستجابة ✅");
     closeModal();
     await loadFromSheet();
   }catch(e){
     console.error(e);
-    showErr("تعذر الحذف. تحققي من الصلاحيات.");
+    showErr("تعذر الحذف.");
   }
 });
 
@@ -365,10 +370,20 @@ document.getElementById("exportBtn").addEventListener("click", ()=>{
 
 /** Buttons */
 document.getElementById("loadBtn").addEventListener("click", loadFromSheet);
+document.getElementById("refreshBtn").addEventListener("click", loadFromSheet);
+
 document.getElementById("goHomeBtn").addEventListener("click", ()=>{
   const base = location.origin + location.pathname.split("/").slice(0,-1).join("/") + "/";
   window.location.href = base;
 });
+
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+  localStorage.removeItem("adminSessionKey");
+  window.location.href = "./";
+});
+
+/** Auto load */
+loadFromSheet();
 </script>
 </body>
 </html>
