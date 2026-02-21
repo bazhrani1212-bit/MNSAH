@@ -26,6 +26,7 @@
     .qBlock{border:1px solid #eef2f7;border-radius:12px;padding:10px;margin:10px 0}
     footer{padding:18px 12px;color:#64748b;font-size:12px;text-align:center}
     .hint{color:#64748b;font-size:12px}
+    .mini{border:1px solid #cbd5e1;background:#fff;color:#0f172a;padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:900}
   </style>
 </head>
 <body>
@@ -40,8 +41,17 @@
 
 <div class="wrap">
   <div class="card">
-    <a class="btn secondary" href="./admin.html">لوحة المديرة</a>
-    <div class="hint" id="statusLine" style="margin-top:10px;">⏳ فحص الاتصال…</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="mini" type="button" id="adminOpenBtn">دخول المديرة</button>
+      <div class="hint" id="statusLine">جاهز</div>
+    </div>
+
+    <div id="adminGate" style="display:none;margin-top:10px;border:1px solid #e2e8f0;border-radius:12px;padding:10px;background:#f8fafc;">
+      <div style="font-weight:900;margin-bottom:6px;">دخول لوحة المديرة</div>
+      <input id="adminPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-bottom:8px;">
+      <button class="btn secondary" type="button" id="adminGoBtn">دخول</button>
+      <div class="hint" id="adminGateMsg" style="margin-top:8px;"></div>
+    </div>
   </div>
 
   <div class="tabs">
@@ -62,7 +72,7 @@
     <input type="hidden" name="payload" id="payloadInput" value="">
   </form>
 
-  <!-- ===== قياس الأثر (كامل) ===== -->
+  <!-- ===== قياس الأثر ===== -->
   <section id="impact" class="card">
     <h3 style="margin:0 0 10px;">قياس أثر برنامج</h3>
 
@@ -274,11 +284,13 @@
 <footer>تصميم/إعداد: بدرية الزهراني</footer>
 
 <script>
+/** رابط Web App (الجديد) */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy098HrSJ1vqA_xNQQal3lCD6Z1-S0vi2Q8_XNVPKNH8B_TQZZiskueR99RwjGjncC/exec";
 
 const okBox = document.getElementById("okBox");
 const errBox = document.getElementById("errBox");
 const statusLine = document.getElementById("statusLine");
+
 const form = document.getElementById("submitForm");
 const payloadInput = document.getElementById("payloadInput");
 
@@ -288,6 +300,7 @@ function showErr(msg){ errBox.textContent=msg; errBox.style.display="block"; okB
 function nowISO(){ return new Date().toISOString(); }
 function getAnonId(){ let id=localStorage.getItem("anonId"); if(!id){ id="anon_"+Math.random().toString(16).slice(2)+"_"+Date.now().toString(16); localStorage.setItem("anonId",id);} return id; }
 function meta(){ return {anonymousId:getAnonId(), ua:navigator.userAgent, lang:navigator.language, tz:Intl.DateTimeFormat().resolvedOptions().timeZone||null, page:location.pathname}; }
+
 function submitPayload(payload){
   payload.createdAt = nowISO();
   payload.meta = meta();
@@ -328,7 +341,7 @@ function readAnswers(containerId){
   return answers;
 }
 
-/** Items نصوص البنود (كما كانت) */
+/** البنود */
 const teacherItems = [
   "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.","يعدل مدير المدرسة في تعامله بين المعلمين.","يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
   "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.","يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.","يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
@@ -361,7 +374,7 @@ buildLikert("s_items", studentSchoolItems);
 buildLikert("p_items", parentItems);
 buildLikert("st_items", studentTeacherItems);
 
-/** Submit handlers */
+/** إرسال */
 document.getElementById("impact_submit").addEventListener("click", ()=>{
   const school = document.getElementById("impact_school").value.trim();
   const program = document.getElementById("impact_program").value.trim();
@@ -445,14 +458,58 @@ document.getElementById("st_submit").addEventListener("click", ()=>{
   });
 });
 
-/** Ping */
+/** JSONP helper (للبوابة فقط) */
+function jsonp(url){
+  return new Promise((resolve, reject)=>{
+    const cb = "cb_" + Math.random().toString(16).slice(2);
+    const u = new URL(url);
+    u.searchParams.set("callback", cb);
+    const s = document.createElement("script");
+    s.src = u.toString();
+    s.async = true;
+    window[cb] = (data)=>{ resolve(data); cleanup(); };
+    s.onerror = ()=>{ reject(new Error("JSONP_FAIL")); cleanup(); };
+    function cleanup(){ try{delete window[cb];}catch{} if(s.parentNode) s.parentNode.removeChild(s); }
+    document.body.appendChild(s);
+    setTimeout(()=>reject(new Error("TIMEOUT")), 15000);
+  });
+}
+
+/** بوابة المديرة */
+const adminOpenBtn = document.getElementById("adminOpenBtn");
+const adminGate = document.getElementById("adminGate");
+const adminGoBtn = document.getElementById("adminGoBtn");
+const adminPass = document.getElementById("adminPass");
+const adminGateMsg = document.getElementById("adminGateMsg");
+
+adminOpenBtn.addEventListener("click", ()=>{
+  adminGate.style.display = adminGate.style.display==="none" ? "block" : "none";
+  adminGateMsg.textContent = "";
+  adminPass.value = "";
+});
+
+adminGoBtn.addEventListener("click", async ()=>{
+  const pass = (adminPass.value||"").trim();
+  if(!pass){ adminGateMsg.textContent="أدخلي كود الدخول."; return; }
+  adminGateMsg.textContent="جاري التحقق…";
+  try{
+    const res = await jsonp(`${APPS_SCRIPT_URL}?action=auth&pass=${encodeURIComponent(pass)}`);
+    if(!res.ok){ adminGateMsg.textContent="كود غير صحيح."; return; }
+    localStorage.setItem("adminSessionKey", res.sessionKey);
+    window.location.href = "./admin.html";
+  }catch{
+    adminGateMsg.textContent="تعذر التحقق. تأكدي من النشر Anyone.";
+  }
+});
+
+/** Ping (اختياري) */
 (async ()=>{
   try{
     const r = await fetch(APPS_SCRIPT_URL + "?action=ping");
     const j = await r.json();
     statusLine.textContent = j?.ok ? "✅ الاتصال جاهز" : "⚠️ لم يتم تأكيد الاتصال";
   }catch{
-    statusLine.textContent = "⚠️ قد لا يظهر ping بسبب CORS، لكن الحفظ يعمل عبر form.";
+    statusLine.textContent = "⚠️ (ping قد يتأثر) لكن الحفظ يعمل.";
   }
 })();
 </script>
