@@ -48,8 +48,8 @@
 
     <div id="adminGate" style="display:none;margin-top:10px;border:1px solid #e2e8f0;border-radius:12px;padding:10px;background:#f8fafc;">
       <div style="font-weight:900;margin-bottom:6px;">دخول لوحة المديرة</div>
-      <input id="adminPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" style="margin-bottom:8px;">
-      <button class="btn secondary" type="button" id="adminGoBtn">دخول</button>
+      <input id="adminPass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="btn secondary" type="button" id="adminGoBtn" style="margin-top:8px;">دخول</button>
       <div class="hint" id="adminGateMsg" style="margin-top:8px;"></div>
     </div>
   </div>
@@ -65,14 +65,12 @@
   <div class="ok" id="okBox">تم حفظ الاستجابة ✅</div>
   <div class="err" id="errBox"></div>
 
-  <!-- iframe + form لتجاوز CORS -->
   <iframe name="hiddenFrame" style="display:none;"></iframe>
   <form id="submitForm" target="hiddenFrame" method="POST">
     <input type="hidden" name="action" value="submit">
     <input type="hidden" name="payload" id="payloadInput" value="">
   </form>
 
-  <!-- ===== قياس الأثر ===== -->
   <section id="impact" class="card">
     <h3 style="margin:0 0 10px;">قياس أثر برنامج</h3>
 
@@ -145,14 +143,8 @@
     </select>
 
     <div class="row">
-      <div>
-        <label>تاريخ التنفيذ</label>
-        <input id="impact_date" type="date">
-      </div>
-      <div>
-        <label>الأسبوع</label>
-        <input id="impact_week" placeholder="مثال: الأسبوع الثالث">
-      </div>
+      <div><label>تاريخ التنفيذ</label><input id="impact_date" type="date"></div>
+      <div><label>الأسبوع</label><input id="impact_week" placeholder="مثال: الأسبوع الثالث"></div>
     </div>
 
     <div class="row">
@@ -162,17 +154,13 @@
 
     <div class="row">
       <div><label>عدد أولياء الأمور</label><input id="impact_nParents" type="number" min="0"></div>
-      <div>
-        <label>مشاركة أعضاء اللجنة</label>
+      <div><label>مشاركة أعضاء اللجنة</label>
         <select id="impact_committee"><option value="">اختر</option><option>نعم</option><option>لا</option></select>
       </div>
     </div>
 
-    <label>الإيجابيات</label>
-    <textarea id="impact_positives"></textarea>
-
-    <label>الصعوبات في التنفيذ</label>
-    <textarea id="impact_challenges"></textarea>
+    <label>الإيجابيات</label><textarea id="impact_positives"></textarea>
+    <label>الصعوبات في التنفيذ</label><textarea id="impact_challenges"></textarea>
 
     <label>روابط الشواهد (كل رابط في سطر)</label>
     <textarea id="impact_evidenceLinks"></textarea>
@@ -180,57 +168,35 @@
     <button class="btn" type="button" id="impact_submit">إرسال وحفظ</button>
   </section>
 
-  <!-- ===== رضا المعلم (18 بند) ===== -->
   <section id="teachers" class="card" style="display:none">
     <h3 style="margin:0 0 10px;">استبانة رضا المعلم عن إدارة المدرسة</h3>
     <p class="hint">الإجابات: دائماً / غالباً / أحياناً / نادراً</p>
 
     <div class="row">
-      <div>
-        <label>اسم المدرسة <span class="req">*</span></label>
-        <input id="t_school" value="الابتدائية السادسة والثلاثون بالخميس">
-      </div>
-      <div>
-        <label>اسم المعلم (اختياري)</label>
-        <input id="t_name">
-      </div>
+      <div><label>اسم المدرسة <span class="req">*</span></label><input id="t_school" value="الابتدائية السادسة والثلاثون بالخميس"></div>
+      <div><label>اسم المعلم (اختياري)</label><input id="t_name"></div>
     </div>
 
     <div id="t_items"></div>
-
-    <label>ملاحظات</label>
-    <textarea id="t_notes"></textarea>
-
+    <label>ملاحظات</label><textarea id="t_notes"></textarea>
     <button class="btn" type="button" id="t_submit">إرسال وحفظ</button>
   </section>
 
-  <!-- ===== رضا الطالب عن المدرسة (12 بند) ===== -->
   <section id="students" class="card" style="display:none">
     <h3 style="margin:0 0 10px;">استبانة رضا الطالب عن المدرسة</h3>
 
     <div class="row">
-      <div>
-        <label>اسم المدرسة <span class="req">*</span></label>
-        <input id="s_school" value="الابتدائية السادسة والثلاثون بالخميس">
-      </div>
-      <div>
-        <label>الصف</label>
-        <input id="s_grade" placeholder="مثال: سادس/2">
-      </div>
+      <div><label>اسم المدرسة <span class="req">*</span></label><input id="s_school" value="الابتدائية السادسة والثلاثون بالخميس"></div>
+      <div><label>الصف</label><input id="s_grade" placeholder="مثال: سادس/2"></div>
     </div>
 
-    <label>اسم الطالب (اختياري)</label>
-    <input id="s_name">
-
+    <label>اسم الطالب (اختياري)</label><input id="s_name">
     <div id="s_items"></div>
 
-    <label>ملاحظات</label>
-    <textarea id="s_notes"></textarea>
-
+    <label>ملاحظات</label><textarea id="s_notes"></textarea>
     <button class="btn" type="button" id="s_submit">إرسال وحفظ</button>
   </section>
 
-  <!-- ===== رضا ولي الأمر (10 بند) ===== -->
   <section id="parents" class="card" style="display:none">
     <h3 style="margin:0 0 10px;">استبانة رضا ولي الأمر عن المدرسة</h3>
 
@@ -240,30 +206,21 @@
     </div>
 
     <div class="row">
-      <div>
-        <label>اسم المدرسة <span class="req">*</span></label>
-        <input id="p_school" value="الابتدائية السادسة والثلاثون بالخميس">
-      </div>
+      <div><label>اسم المدرسة <span class="req">*</span></label><input id="p_school" value="الابتدائية السادسة والثلاثون بالخميس"></div>
       <div><label>اسم الطالب/الطالبة (اختياري)</label><input id="p_student"></div>
     </div>
 
     <div id="p_items"></div>
 
-    <label>ملاحظات</label>
-    <textarea id="p_notes"></textarea>
-
+    <label>ملاحظات</label><textarea id="p_notes"></textarea>
     <button class="btn" type="button" id="p_submit">إرسال وحفظ</button>
   </section>
 
-  <!-- ===== رضا الطالب عن المعلم (10 بند) ===== -->
   <section id="studentTeacher" class="card" style="display:none">
     <h3 style="margin:0 0 10px;">استبانة رضا الطالب عن المعلم</h3>
 
     <div class="row">
-      <div>
-        <label>اسم المدرسة <span class="req">*</span></label>
-        <input id="st_school" value="الابتدائية السادسة والثلاثون بالخميس">
-      </div>
+      <div><label>اسم المدرسة <span class="req">*</span></label><input id="st_school" value="الابتدائية السادسة والثلاثون بالخميس"></div>
       <div><label>المادة</label><input id="st_subject" placeholder="مثال: العلوم"></div>
     </div>
 
@@ -274,9 +231,7 @@
 
     <div id="st_items"></div>
 
-    <label>ملاحظات</label>
-    <textarea id="st_notes"></textarea>
-
+    <label>ملاحظات</label><textarea id="st_notes"></textarea>
     <button class="btn" type="button" id="st_submit">إرسال وحفظ</button>
   </section>
 </div>
@@ -284,8 +239,7 @@
 <footer>تصميم/إعداد: بدرية الزهراني</footer>
 
 <script>
-/** رابط Web App (الجديد) */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy098HrSJ1vqA_xNQQal3lCD6Z1-S0vi2Q8_XNVPKNH8B_TQZZiskueR99RwjGjncC/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjO88bOSAKDnI7xYwgrNsvmD3enY21tgarcB8cseO5BR-xitjjv81YNz-fqK-j7tTX/exec";
 
 const okBox = document.getElementById("okBox");
 const errBox = document.getElementById("errBox");
@@ -319,7 +273,6 @@ function setTab(view){
 }
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click", ()=>setTab(b.dataset.view)));
 
-/** Likert builder */
 function buildLikert(containerId, items){
   const c = document.getElementById(containerId);
   c.innerHTML = items.map((t,i)=>`
@@ -341,7 +294,6 @@ function readAnswers(containerId){
   return answers;
 }
 
-/** البنود */
 const teacherItems = [
   "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.","يعدل مدير المدرسة في تعامله بين المعلمين.","يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
   "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.","يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.","يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
@@ -374,7 +326,6 @@ buildLikert("s_items", studentSchoolItems);
 buildLikert("p_items", parentItems);
 buildLikert("st_items", studentTeacherItems);
 
-/** إرسال */
 document.getElementById("impact_submit").addEventListener("click", ()=>{
   const school = document.getElementById("impact_school").value.trim();
   const program = document.getElementById("impact_program").value.trim();
@@ -458,7 +409,6 @@ document.getElementById("st_submit").addEventListener("click", ()=>{
   });
 });
 
-/** JSONP helper (للبوابة فقط) */
 function jsonp(url){
   return new Promise((resolve, reject)=>{
     const cb = "cb_" + Math.random().toString(16).slice(2);
@@ -475,7 +425,6 @@ function jsonp(url){
   });
 }
 
-/** بوابة المديرة */
 const adminOpenBtn = document.getElementById("adminOpenBtn");
 const adminGate = document.getElementById("adminGate");
 const adminGoBtn = document.getElementById("adminGoBtn");
@@ -502,7 +451,6 @@ adminGoBtn.addEventListener("click", async ()=>{
   }
 });
 
-/** Ping (اختياري) */
 (async ()=>{
   try{
     const r = await fetch(APPS_SCRIPT_URL + "?action=ping");
