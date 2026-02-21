@@ -7,29 +7,32 @@
   <style>
     body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial; margin:0; background:#f6f7fb;}
     header{background:#0f766e;color:#fff;padding:14px 12px;}
-    .wrap{max-width:980px;margin:0 auto;padding:14px;}
+    .wrap{max-width:1000px;margin:0 auto;padding:14px;}
     .card{background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 8px rgba(0,0,0,.06);margin:10px 0;}
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
-    .tab{border:0;padding:10px 12px;border-radius:10px;background:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .tab{border:0;padding:10px 12px;border-radius:10px;background:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06);font-weight:900}
     .tab.active{background:#e6fffb;outline:2px solid #14b8a6}
-    label{display:block;margin:10px 0 6px;font-weight:800}
+    label{display:block;margin:10px 0 6px;font-weight:900}
     input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px}
     textarea{min-height:90px}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:720px){.row{grid-template-columns:1fr}}
-    .btn{border:0;background:#0f766e;color:#fff;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:900}
+    .btn{border:0;background:#0f766e;color:#fff;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:1000}
     .btn.secondary{background:#334155}
-    .ok{display:none;background:#ecfdf5;border:1px solid #10b981;color:#065f46;padding:10px;border-radius:12px;margin:10px 0}
-    .err{display:none;background:#fef2f2;border:1px solid #ef4444;color:#7f1d1d;padding:10px;border-radius:12px;margin:10px 0}
+    .ok,.err{display:none;padding:10px;border-radius:12px;margin:10px 0}
+    .ok{background:#ecfdf5;border:1px solid #10b981;color:#065f46;}
+    .err{background:#fef2f2;border:1px solid #ef4444;color:#7f1d1d;}
+    .req{color:#dc2626;font-weight:1000}
+    .qBlock{border:1px solid #eef2f7;border-radius:12px;padding:10px;margin:10px 0}
     footer{padding:18px 12px;color:#64748b;font-size:12px;text-align:center}
-    .req{color:#dc2626;font-weight:900}
+    .hint{color:#64748b;font-size:12px}
   </style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div style="font-weight:1000;font-size:18px;">منصة قياس الأثر ورضا المستفيد</div>
-    <div style="opacity:.95;font-size:13px;line-height:1.5;">
+    <div style="opacity:.95;font-size:13px;line-height:1.6;">
       المدرسة: <b>الابتدائية السادسة والثلاثون بالخميس</b> — مديرة المدرسة: <b>نورة الرفاعي</b>
     </div>
   </div>
@@ -38,29 +41,31 @@
 <div class="wrap">
   <div class="card">
     <a class="btn secondary" href="./admin.html">لوحة المديرة</a>
+    <div class="hint" id="statusLine" style="margin-top:10px;">⏳ فحص الاتصال…</div>
   </div>
 
   <div class="tabs">
     <button class="tab active" data-view="impact">قياس أثر برنامج</button>
-    <button class="tab" data-view="teachers">رضا المعلم</button>
+    <button class="tab" data-view="teachers">رضا المعلم عن إدارة المدرسة</button>
     <button class="tab" data-view="students">رضا الطالب عن المدرسة</button>
-    <button class="tab" data-view="parents">رضا ولي الأمر</button>
+    <button class="tab" data-view="parents">رضا ولي الأمر عن المدرسة</button>
     <button class="tab" data-view="studentTeacher">رضا الطالب عن المعلم</button>
   </div>
 
   <div class="ok" id="okBox">تم حفظ الاستجابة ✅</div>
   <div class="err" id="errBox"></div>
 
-  <!-- iframe + form (تجاوز CORS) -->
+  <!-- iframe + form لتجاوز CORS -->
   <iframe name="hiddenFrame" style="display:none;"></iframe>
   <form id="submitForm" target="hiddenFrame" method="POST">
     <input type="hidden" name="action" value="submit">
     <input type="hidden" name="payload" id="payloadInput" value="">
   </form>
 
-  <!-- ===== نموذج قياس الأثر (مختصر وعملي) ===== -->
+  <!-- ===== قياس الأثر (كامل) ===== -->
   <section id="impact" class="card">
     <h3 style="margin:0 0 10px;">قياس أثر برنامج</h3>
+
     <div class="row">
       <div>
         <label>اسم المدرسة <span class="req">*</span></label>
@@ -71,6 +76,38 @@
         <input id="impact_program" placeholder="مثال: برنامج إرشادي">
       </div>
     </div>
+
+    <div class="row">
+      <div>
+        <label>المجال</label>
+        <select id="impact_domain">
+          <option value="">اختر</option>
+          <option>نفسي</option><option>تربوي</option><option>اجتماعي</option><option>مهني</option>
+        </select>
+      </div>
+      <div>
+        <label>المستهدفون</label>
+        <input id="impact_targets" placeholder="طلاب/طالبات، معلمين، أولياء أمور...">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>الأداء العام للبرنامج</label>
+        <select id="impact_perf">
+          <option value="">اختر</option>
+          <option>جيد</option><option>مقبول</option><option>ضعيف</option>
+        </select>
+      </div>
+      <div>
+        <label>مستوى الأثر</label>
+        <select id="impact_level">
+          <option value="">اختر</option>
+          <option>تأثير ملحوظ</option><option>طفيف</option><option>لا يوجد</option>
+        </select>
+      </div>
+    </div>
+
     <div class="row">
       <div>
         <label>نسبة تحقق الأهداف (0-100)</label>
@@ -81,55 +118,155 @@
         <input id="impact_effectPct" type="number" min="0" max="100">
       </div>
     </div>
-    <label>ملاحظات/إيجابيات</label>
+
+    <label>أدوات قياس الأثر</label>
+    <div class="row">
+      <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" class="tool" value="الاستبانات"> الاستبانات</label>
+      <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" class="tool" value="الملاحظة المباشرة"> الملاحظة المباشرة</label>
+      <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" class="tool" value="المقابلات"> المقابلات</label>
+      <label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" class="tool" value="أخرى"> أخرى</label>
+    </div>
+
+    <label>أسلوب التنفيذ</label>
+    <select id="impact_method">
+      <option value="">اختر</option>
+      <option>لقاء</option><option>ورشة عمل</option><option>مواد إعلامية</option><option>زيارة خارجية</option>
+      <option>معرض</option><option>مسابقة</option><option>أخرى</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>تاريخ التنفيذ</label>
+        <input id="impact_date" type="date">
+      </div>
+      <div>
+        <label>الأسبوع</label>
+        <input id="impact_week" placeholder="مثال: الأسبوع الثالث">
+      </div>
+    </div>
+
+    <div class="row">
+      <div><label>عدد الطلاب/الطالبات</label><input id="impact_nStudents" type="number" min="0"></div>
+      <div><label>عدد المعلمين/المعلمات</label><input id="impact_nTeachers" type="number" min="0"></div>
+    </div>
+
+    <div class="row">
+      <div><label>عدد أولياء الأمور</label><input id="impact_nParents" type="number" min="0"></div>
+      <div>
+        <label>مشاركة أعضاء اللجنة</label>
+        <select id="impact_committee"><option value="">اختر</option><option>نعم</option><option>لا</option></select>
+      </div>
+    </div>
+
+    <label>الإيجابيات</label>
     <textarea id="impact_positives"></textarea>
-    <label>صعوبات</label>
+
+    <label>الصعوبات في التنفيذ</label>
     <textarea id="impact_challenges"></textarea>
+
+    <label>روابط الشواهد (كل رابط في سطر)</label>
+    <textarea id="impact_evidenceLinks"></textarea>
+
     <button class="btn" type="button" id="impact_submit">إرسال وحفظ</button>
   </section>
 
-  <!-- نماذج الاستبانات (نضعها مختصرة هنا، ولو تبين أرجعها كاملة مثل السابق أرسلها لك) -->
+  <!-- ===== رضا المعلم (18 بند) ===== -->
   <section id="teachers" class="card" style="display:none">
-    <h3 style="margin:0 0 10px;">رضا المعلم</h3>
-    <label>اسم المدرسة <span class="req">*</span></label>
-    <input id="t_school" value="الابتدائية السادسة والثلاثون بالخميس">
-    <label>مثال إجابة بند 1</label>
-    <select id="t_q1">
-      <option value="">اختر</option><option>دائماً</option><option>غالباً</option><option>أحياناً</option><option>نادراً</option>
-    </select>
+    <h3 style="margin:0 0 10px;">استبانة رضا المعلم عن إدارة المدرسة</h3>
+    <p class="hint">الإجابات: دائماً / غالباً / أحياناً / نادراً</p>
+
+    <div class="row">
+      <div>
+        <label>اسم المدرسة <span class="req">*</span></label>
+        <input id="t_school" value="الابتدائية السادسة والثلاثون بالخميس">
+      </div>
+      <div>
+        <label>اسم المعلم (اختياري)</label>
+        <input id="t_name">
+      </div>
+    </div>
+
+    <div id="t_items"></div>
+
+    <label>ملاحظات</label>
+    <textarea id="t_notes"></textarea>
+
     <button class="btn" type="button" id="t_submit">إرسال وحفظ</button>
   </section>
 
+  <!-- ===== رضا الطالب عن المدرسة (12 بند) ===== -->
   <section id="students" class="card" style="display:none">
-    <h3 style="margin:0 0 10px;">رضا الطالب عن المدرسة</h3>
-    <label>اسم المدرسة <span class="req">*</span></label>
-    <input id="s_school" value="الابتدائية السادسة والثلاثون بالخميس">
-    <label>مثال إجابة بند 1</label>
-    <select id="s_q1">
-      <option value="">اختر</option><option>دائماً</option><option>غالباً</option><option>أحياناً</option><option>نادراً</option>
-    </select>
+    <h3 style="margin:0 0 10px;">استبانة رضا الطالب عن المدرسة</h3>
+
+    <div class="row">
+      <div>
+        <label>اسم المدرسة <span class="req">*</span></label>
+        <input id="s_school" value="الابتدائية السادسة والثلاثون بالخميس">
+      </div>
+      <div>
+        <label>الصف</label>
+        <input id="s_grade" placeholder="مثال: سادس/2">
+      </div>
+    </div>
+
+    <label>اسم الطالب (اختياري)</label>
+    <input id="s_name">
+
+    <div id="s_items"></div>
+
+    <label>ملاحظات</label>
+    <textarea id="s_notes"></textarea>
+
     <button class="btn" type="button" id="s_submit">إرسال وحفظ</button>
   </section>
 
+  <!-- ===== رضا ولي الأمر (10 بند) ===== -->
   <section id="parents" class="card" style="display:none">
-    <h3 style="margin:0 0 10px;">رضا ولي الأمر</h3>
-    <label>اسم المدرسة <span class="req">*</span></label>
-    <input id="p_school" value="الابتدائية السادسة والثلاثون بالخميس">
-    <label>مثال إجابة بند 1</label>
-    <select id="p_q1">
-      <option value="">اختر</option><option>دائماً</option><option>غالباً</option><option>أحياناً</option><option>نادراً</option>
-    </select>
+    <h3 style="margin:0 0 10px;">استبانة رضا ولي الأمر عن المدرسة</h3>
+
+    <div class="row">
+      <div><label>اسم ولي الأمر (اختياري)</label><input id="p_name"></div>
+      <div><label>المؤهل (اختياري)</label><input id="p_edu"></div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>اسم المدرسة <span class="req">*</span></label>
+        <input id="p_school" value="الابتدائية السادسة والثلاثون بالخميس">
+      </div>
+      <div><label>اسم الطالب/الطالبة (اختياري)</label><input id="p_student"></div>
+    </div>
+
+    <div id="p_items"></div>
+
+    <label>ملاحظات</label>
+    <textarea id="p_notes"></textarea>
+
     <button class="btn" type="button" id="p_submit">إرسال وحفظ</button>
   </section>
 
+  <!-- ===== رضا الطالب عن المعلم (10 بند) ===== -->
   <section id="studentTeacher" class="card" style="display:none">
-    <h3 style="margin:0 0 10px;">رضا الطالب عن المعلم</h3>
-    <label>اسم المدرسة <span class="req">*</span></label>
-    <input id="st_school" value="الابتدائية السادسة والثلاثون بالخميس">
-    <label>مثال إجابة بند 1</label>
-    <select id="st_q1">
-      <option value="">اختر</option><option>دائماً</option><option>غالباً</option><option>أحياناً</option><option>نادراً</option>
-    </select>
+    <h3 style="margin:0 0 10px;">استبانة رضا الطالب عن المعلم</h3>
+
+    <div class="row">
+      <div>
+        <label>اسم المدرسة <span class="req">*</span></label>
+        <input id="st_school" value="الابتدائية السادسة والثلاثون بالخميس">
+      </div>
+      <div><label>المادة</label><input id="st_subject" placeholder="مثال: العلوم"></div>
+    </div>
+
+    <div class="row">
+      <div><label>الصف</label><input id="st_grade"></div>
+      <div><label>اسم الطالب (اختياري)</label><input id="st_name"></div>
+    </div>
+
+    <div id="st_items"></div>
+
+    <label>ملاحظات</label>
+    <textarea id="st_notes"></textarea>
+
     <button class="btn" type="button" id="st_submit">إرسال وحفظ</button>
   </section>
 </div>
@@ -141,6 +278,7 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy098HrSJ1vqA_
 
 const okBox = document.getElementById("okBox");
 const errBox = document.getElementById("errBox");
+const statusLine = document.getElementById("statusLine");
 const form = document.getElementById("submitForm");
 const payloadInput = document.getElementById("payloadInput");
 
@@ -150,59 +288,173 @@ function showErr(msg){ errBox.textContent=msg; errBox.style.display="block"; okB
 function nowISO(){ return new Date().toISOString(); }
 function getAnonId(){ let id=localStorage.getItem("anonId"); if(!id){ id="anon_"+Math.random().toString(16).slice(2)+"_"+Date.now().toString(16); localStorage.setItem("anonId",id);} return id; }
 function meta(){ return {anonymousId:getAnonId(), ua:navigator.userAgent, lang:navigator.language, tz:Intl.DateTimeFormat().resolvedOptions().timeZone||null, page:location.pathname}; }
+function submitPayload(payload){
+  payload.createdAt = nowISO();
+  payload.meta = meta();
+  form.action = APPS_SCRIPT_URL;
+  payloadInput.value = JSON.stringify(payload);
+  form.submit();
+  showOk("تم إرسال الاستجابة ✅ (تم حفظها بالشيت)");
+}
 
 function setTab(view){
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.dataset.view===view));
   ["impact","teachers","students","parents","studentTeacher"].forEach(id=>{
     document.getElementById(id).style.display = (id===view) ? "block" : "none";
   });
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click", ()=>setTab(b.dataset.view)));
 
-function submitPayload(payload){
-  payload.createdAt = nowISO();
-  payload.meta = meta();
-  form.action = APPS_SCRIPT_URL; // مهم
-  payloadInput.value = JSON.stringify(payload);
-  form.submit();
-  showOk("تم إرسال الاستجابة ✅ (يُحفظ في الشيت)");
+/** Likert builder */
+function buildLikert(containerId, items){
+  const c = document.getElementById(containerId);
+  c.innerHTML = items.map((t,i)=>`
+    <div class="qBlock">
+      <div style="font-weight:900;margin-bottom:6px;">${i+1}) ${t}</div>
+      <select data-q="${i+1}">
+        <option value="">اختر</option>
+        <option>دائماً</option><option>غالباً</option><option>أحياناً</option><option>نادراً</option>
+      </select>
+    </div>
+  `).join("");
+}
+function readAnswers(containerId){
+  const c = document.getElementById(containerId);
+  const answers = {};
+  c.querySelectorAll("select[data-q]").forEach(s=>{
+    answers[s.getAttribute("data-q")] = s.value || null;
+  });
+  return answers;
 }
 
+/** Items نصوص البنود (كما كانت) */
+const teacherItems = [
+  "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.","يعدل مدير المدرسة في تعامله بين المعلمين.","يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
+  "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.","يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.","يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
+  "يستشير مدير المدرسة المعلمين قبل اتخاذ قراراته.","يقوم مدير المدرسة بزيارة المعلمين زيارة صفية.","يقوم مدير المدرسة المعلمين تقويما شاملا.",
+  "يوزع مدير المدرسة أنصبة المعلمين بطريقة عادلة.","يقدم مدير المدرسة ملاحظاته وتوجيهاته بطريقة مناسبة.","يمثل مدير المدرسة قدوة في الانضباط في العمل.",
+  "يستخدم مدير المدرسة أسلوب الثواب والعقاب.","يطلع مدير المدرسة المعلمين على التعليمات والنظم بشكل مستمر.","أجد رغبة في مساعدة المدرسة في الأزمات.",
+  "لا أجد حرجا في المشاركة في الأنشطة اللاصفية خارج وقت الدوام.","أرغب بزيارة مدير المدرسة لي زيارة صفية.","أرغب الانتقال من المدرسة إلى مدرسة أخرى."
+];
+const studentSchoolItems = [
+  "تعتني المدرسة برفع مستوى تحصيل الطلاب.","تتيح المدرسة للطلاب فرص اكتشاف مواهبهم وقدراتهم.","تهتم المدرسة بنظافة الفصول ونظافة المدرسة بشكل عام.",
+  "تأخذ المدرسة بآراء الطلاب فيما يتعلق باحتياجاتهم.","تهتم المدرسة بنوعية الوجبات المقدمة في المقصف المدرسي.","تكرم المدرسة الطلبة المتميزين والمتفوقين.",
+  "تقيم المدرسة المناشط اللاصفية أثناء اليوم الدراسي وخارجه.","تعتني المدرسة بحل المشاكل التي تعترض الطلاب.","تشرك المدرسة الطلاب في إدارة اليوم الدراسي.",
+  "يستفيد الطلاب من قاعة مصادر التعلم الموجودة في المدرسة.","أشعر بتمام الراحة في مدرستي.","أتمنى أن أنتقل إلى مدرسة أخرى."
+];
+const parentItems = [
+  "تتواصل المدرسة مع أولياء الأمور لمشاركتهم في رؤية المدرسة ورسالتها.","أشعر باحترام وتقدير المدرسة عند تعاملها معي (كولي أمر طالب).",
+  "ألاحظ أن المدرسة تشجع طلابها على التميز في جميع المجالات.","تتاح لي فرصة المشاركة مع المدرسة في العملية التعليمية.",
+  "تحرص المدرسة على مشاركة أولياء الأمور في الرعاية الصحية للمتعلمين.","تحرص المدرسة على تيسير التواصل بين المعلمين والمتعلمين وأولياء الأمور من خلال الموقع الإلكتروني.",
+  "تستخدم المدرسة نظاماً لإعلام أولياء الأمور بمستوى تقدم أداء أبنائهم.","تحرص المدرسة على مشاركة أولياء الأمور في تطوير العملية التعليمية.",
+  "تنشر المدرسة ثقافة الإرشاد التربوي والنفسي بين أولياء الأمور.","توفر المدرسة لأولياء أمور الطلاب أرقاما للتواصل (ثابت – جوال)."
+];
+const studentTeacherItems = [
+  "يحرص المعلم على توضيح الدرس بطريقة مناسبة.","يهتم المعلم بتوصيل المعلومة إلى الطالب.","يستخدم المعلم طرقا حديثة ومتنوعة في شرح الدروس.",
+  "ينوع المعلم في طرق تدريسه.","يعتني المعلم بالوسائل التعليمية عند عرض المعلومة.","يشجع المعلم الطلاب.",
+  "يبذل المعلم جهده لدفع الملل والسآمة عن الطلاب.","يأخذ المعلم بآراء الطلاب.","يقيم المعلم مع الطلاب علاقة صداقة.","يهتم المعلم بحل مشاكل الطلاب."
+];
+
+buildLikert("t_items", teacherItems);
+buildLikert("s_items", studentSchoolItems);
+buildLikert("p_items", parentItems);
+buildLikert("st_items", studentTeacherItems);
+
+/** Submit handlers */
 document.getElementById("impact_submit").addEventListener("click", ()=>{
   const school = document.getElementById("impact_school").value.trim();
   const program = document.getElementById("impact_program").value.trim();
   if(!school || !program){ showErr("اسم المدرسة واسم البرنامج مطلوبان."); return; }
+
+  const tools = [...document.querySelectorAll(".tool:checked")].map(x=>x.value);
+
   submitPayload({
     type:"impact",
     school, program,
-    goalPct: Number(document.getElementById("impact_goalPct").value||0),
-    effectPct: Number(document.getElementById("impact_effectPct").value||0),
+    domain: document.getElementById("impact_domain").value || "",
+    targets: document.getElementById("impact_targets").value.trim(),
+    performance: document.getElementById("impact_perf").value || "",
+    impactLevel: document.getElementById("impact_level").value || "",
+    goalPct: Number(document.getElementById("impact_goalPct").value || 0),
+    effectPct: Number(document.getElementById("impact_effectPct").value || 0),
+    tools,
+    method: document.getElementById("impact_method").value || "",
+    date: document.getElementById("impact_date").value || "",
+    week: document.getElementById("impact_week").value.trim(),
+    nStudents: Number(document.getElementById("impact_nStudents").value || 0),
+    nTeachers: Number(document.getElementById("impact_nTeachers").value || 0),
+    nParents: Number(document.getElementById("impact_nParents").value || 0),
+    committee: document.getElementById("impact_committee").value || "",
     positives: document.getElementById("impact_positives").value.trim(),
     challenges: document.getElementById("impact_challenges").value.trim(),
+    evidenceLinks: document.getElementById("impact_evidenceLinks").value.split("\n").map(x=>x.trim()).filter(Boolean),
   });
 });
 
-// أمثلة استبانات (بند واحد) — إذا تبين أرجعها كاملة 10/18 بند
 document.getElementById("t_submit").addEventListener("click", ()=>{
   const school = document.getElementById("t_school").value.trim();
   if(!school){ showErr("اسم المدرسة مطلوب."); return; }
-  submitPayload({ type:"teacher_satisfaction", school, answers:{ "1": document.getElementById("t_q1").value||null } });
+  submitPayload({
+    type:"teacher_satisfaction",
+    school,
+    name: document.getElementById("t_name").value.trim(),
+    answers: readAnswers("t_items"),
+    notes: document.getElementById("t_notes").value.trim()
+  });
 });
+
 document.getElementById("s_submit").addEventListener("click", ()=>{
   const school = document.getElementById("s_school").value.trim();
   if(!school){ showErr("اسم المدرسة مطلوب."); return; }
-  submitPayload({ type:"student_school_satisfaction", school, answers:{ "1": document.getElementById("s_q1").value||null } });
+  submitPayload({
+    type:"student_school_satisfaction",
+    school,
+    grade: document.getElementById("s_grade").value.trim(),
+    name: document.getElementById("s_name").value.trim(),
+    answers: readAnswers("s_items"),
+    notes: document.getElementById("s_notes").value.trim()
+  });
 });
+
 document.getElementById("p_submit").addEventListener("click", ()=>{
   const school = document.getElementById("p_school").value.trim();
   if(!school){ showErr("اسم المدرسة مطلوب."); return; }
-  submitPayload({ type:"parent_satisfaction", school, answers:{ "1": document.getElementById("p_q1").value||null } });
+  submitPayload({
+    type:"parent_satisfaction",
+    school,
+    parentName: document.getElementById("p_name").value.trim(),
+    education: document.getElementById("p_edu").value.trim(),
+    studentName: document.getElementById("p_student").value.trim(),
+    answers: readAnswers("p_items"),
+    notes: document.getElementById("p_notes").value.trim()
+  });
 });
+
 document.getElementById("st_submit").addEventListener("click", ()=>{
   const school = document.getElementById("st_school").value.trim();
   if(!school){ showErr("اسم المدرسة مطلوب."); return; }
-  submitPayload({ type:"student_teacher_satisfaction", school, answers:{ "1": document.getElementById("st_q1").value||null } });
+  submitPayload({
+    type:"student_teacher_satisfaction",
+    school,
+    subject: document.getElementById("st_subject").value.trim(),
+    grade: document.getElementById("st_grade").value.trim(),
+    name: document.getElementById("st_name").value.trim(),
+    answers: readAnswers("st_items"),
+    notes: document.getElementById("st_notes").value.trim()
+  });
 });
+
+/** Ping */
+(async ()=>{
+  try{
+    const r = await fetch(APPS_SCRIPT_URL + "?action=ping");
+    const j = await r.json();
+    statusLine.textContent = j?.ok ? "✅ الاتصال جاهز" : "⚠️ لم يتم تأكيد الاتصال";
+  }catch{
+    statusLine.textContent = "⚠️ قد لا يظهر ping بسبب CORS، لكن الحفظ يعمل عبر form.";
+  }
+})();
 </script>
 </body>
 </html>
