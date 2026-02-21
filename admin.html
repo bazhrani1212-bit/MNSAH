@@ -14,6 +14,7 @@
     .card{background:#fff; border-radius:14px; padding:14px; box-shadow:0 1px 8px rgba(0,0,0,.06); margin:10px 0;}
     .btn{border:0; background:#0f766e; color:#fff; padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:900}
     .btn.gray{background:#475569}
+    .btn.light{background:#64748b}
     input,select{padding:10px; border-radius:10px; border:1px solid #d0d7de; width:100%}
     .row{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px}
     @media(max-width:1100px){.row{grid-template-columns:1fr 1fr}}
@@ -27,6 +28,36 @@
     footer{padding:18px 12px; color:#64748b; font-size:12px; text-align:center}
     .actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
     .tag{display:inline-block; padding:4px 10px; border-radius:999px; background:#e2e8f0; font-size:12px; margin:2px 4px 2px 0;}
+    .mini{font-size:12px; color:#64748b}
+    .linklike{color:#0f766e; font-weight:900; cursor:pointer; text-decoration:underline}
+
+    /* Stats */
+    .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:700px){.stats{grid-template-columns:1fr;}}
+    .stat{border:1px solid #eef2f7; border-radius:14px; padding:12px;}
+    .stat .k{color:#64748b; font-size:12px; margin-bottom:6px;}
+    .stat .v{font-weight:1000; font-size:18px;}
+    .barRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+    .bar{background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:6px 10px; font-size:12px;}
+    .bar b{font-weight:1000;}
+
+    /* Modal */
+    .backdrop{position:fixed; inset:0; background:rgba(15,23,42,.55); display:none; align-items:center; justify-content:center; padding:14px; z-index:9999;}
+    .modal{max-width:900px; width:100%; background:#fff; border-radius:16px; box-shadow:0 12px 40px rgba(0,0,0,.25); overflow:hidden;}
+    .modalHead{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;}
+    .modalHead .title{font-weight:1000}
+    .closeX{border:0; background:transparent; font-size:20px; cursor:pointer; padding:4px 8px; line-height:1;}
+    .modalBody{padding:14px; max-height:72vh; overflow:auto;}
+    .sectionTitle{font-weight:1000; margin:12px 0 8px;}
+    .field{background:#fff; border:1px solid #eef2f7; border-radius:12px; padding:10px; margin:8px 0;}
+    .field .k{font-size:12px; color:#64748b; margin-bottom:6px;}
+    .field .v{font-size:14px; white-space:pre-wrap; word-break:break-word;}
+    .pill{display:inline-block; padding:4px 10px; border-radius:999px; background:#e6fffb; border:1px solid #99f6e4; margin:2px 4px 2px 0; font-size:12px;}
+    .qItem{border:1px solid #eef2f7; border-radius:12px; padding:10px; margin:8px 0;}
+    .qItem .q{font-weight:900; margin-bottom:6px;}
+    .qItem .a{color:#0f172a;}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-size:12px;}
   </style>
 </head>
 <body>
@@ -59,7 +90,7 @@
     <div class="row">
       <div>
         <label class="hint">Admin Token</label>
-        <input id="tokenInput" placeholder="التوكن الموجود في ورقة settings داخل Google Sheet" />
+        <input id="tokenInput" placeholder="التوكن الموجود في ورقة settings" />
       </div>
       <div>
         <label class="hint">النوع</label>
@@ -86,8 +117,24 @@
         </select>
       </div>
     </div>
+    <div class="hint" style="margin-top:10px;">💡 اضغطي “عرض” لفتح الاستجابة كاستمارة في نافذة منبثقة.</div>
   </div>
 
+  <!-- Stats -->
+  <div class="card">
+    <div class="sectionTitle">إحصائيات سريعة</div>
+    <div class="stats">
+      <div class="stat"><div class="k">إجمالي الاستجابات</div><div class="v" id="st_total">—</div></div>
+      <div class="stat"><div class="k">عدد “قياس الأثر”</div><div class="v" id="st_impact">—</div></div>
+      <div class="stat"><div class="k">متوسط % الأثر (Impact)</div><div class="v" id="st_avgImpactPct">—</div></div>
+      <div class="stat"><div class="k">متوسط تحقق الأهداف (Impact)</div><div class="v" id="st_avgGoalPct">—</div></div>
+    </div>
+    <div class="barRow" id="st_countsByType"></div>
+    <div class="barRow" id="st_likertDist"></div>
+    <div class="hint" style="margin-top:10px;">* الإحصائيات تعتمد على البيانات التي تم تحميلها (وقد تتغير حسب الفلاتر).</div>
+  </div>
+
+  <!-- Table -->
   <div class="card">
     <div class="hint" id="summaryLine">—</div>
     <div style="overflow:auto; margin-top:10px">
@@ -98,6 +145,7 @@
             <th>التاريخ</th>
             <th>المدرسة</th>
             <th>مختصر</th>
+            <th>عرض</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -108,20 +156,26 @@
 
 <footer>تصميم/إعداد: بدرية الزهراني</footer>
 
+<!-- Modal -->
+<div class="backdrop" id="backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modalHead">
+      <div class="title" id="modalTitle">عرض الاستجابة</div>
+      <button class="closeX" id="closeX" title="إغلاق">✕</button>
+    </div>
+    <div class="modalBody" id="modalBody"></div>
+  </div>
+</div>
+
 <script>
-/** رابط Web App (مُثبت منك) */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZBgj7Qomh3858lXJWripmkFlKW_bcUD8POm7XXCuk6nAQJAc6EPZdFu8YOciaMdUM/exec";
 
-/** UI */
 const okBox = document.getElementById('okBox');
 const errBox = document.getElementById('errBox');
 const statusLine = document.getElementById('statusLine');
-
-function showOk(msg){ okBox.textContent=msg; okBox.style.display='block'; errBox.style.display='none'; setTimeout(()=>okBox.style.display='none', 3500); }
-function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; okBox.style.display='none'; setTimeout(()=>errBox.style.display='none', 6500); }
-
 const rowsEl = document.getElementById("rows");
 const summaryLine = document.getElementById("summaryLine");
+
 const tokenInput = document.getElementById("tokenInput");
 const typeFilter = document.getElementById("typeFilter");
 const searchText = document.getElementById("searchText");
@@ -129,24 +183,73 @@ const limitSel = document.getElementById("limitSel");
 
 let allData = [];
 
+function showOk(msg){ okBox.textContent=msg; okBox.style.display='block'; errBox.style.display='none'; setTimeout(()=>okBox.style.display='none', 3500); }
+function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; okBox.style.display='none'; setTimeout(()=>errBox.style.display='none', 6500); }
 function esc(s){ return (s??"").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
 function fmtType(t){
-  const map={impact:"قياس الأثر",teacher_satisfaction:"رضا المعلم",student_school_satisfaction:"رضا الطالب عن المدرسة",parent_satisfaction:"رضا ولي الأمر",student_teacher_satisfaction:"رضا الطالب عن المعلم"};
+  const map={
+    impact:"قياس الأثر",
+    teacher_satisfaction:"رضا المعلم",
+    student_school_satisfaction:"رضا الطالب عن المدرسة",
+    parent_satisfaction:"رضا ولي الأمر",
+    student_teacher_satisfaction:"رضا الطالب عن المعلم"
+  };
   return map[t]||t;
 }
+
+function safeJsonParse(v){
+  if(v == null) return null;
+  if(typeof v === "object") return v;
+  const s = String(v).trim();
+  if(!s) return null;
+  try{ return JSON.parse(s); }catch{ return null; }
+}
+
 function rowBrief(x){
   if(x.type==="impact"){
-    const tags=[x.program?`برنامج: ${x.program}`:null,x.impactLevel?`الأثر: ${x.impactLevel}`:null,(x.effectPct!=="" && x.effectPct!=null)?`%الأثر: ${x.effectPct}`:null].filter(Boolean);
+    const tags=[
+      x.program?`برنامج: ${x.program}`:null,
+      x.impactLevel?`الأثر: ${x.impactLevel}`:null,
+      (x.effectPct!=="" && x.effectPct!=null)?`%الأثر: ${x.effectPct}`:null
+    ].filter(Boolean);
     return tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');
   }
-  let answered = 0;
-  try{
-    const ans = (typeof x.answers === "string") ? JSON.parse(x.answers) : x.answers;
-    answered = ans ? Object.values(ans).filter(Boolean).length : 0;
-  }catch{}
-  const tags=[`بنود مجابة: ${answered}`, x.subject?`مادة: ${x.subject}`:null].filter(Boolean);
+  const ans = safeJsonParse(x.answers);
+  const answered = ans ? Object.values(ans).filter(Boolean).length : 0;
+  const tags=[`بنود مجابة: ${answered}`, x.subject?`مادة: ${x.subject}`:null, x.grade?`صف: ${x.grade}`:null].filter(Boolean);
   return tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');
 }
+
+/** ===== Questions text (حتى يظهر كاستمارة) ===== */
+const QUESTIONS = {
+  teacher_satisfaction: [
+    "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.","يعدل مدير المدرسة في تعامله بين المعلمين.","يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
+    "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.","يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.","يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
+    "يستشير مدير المدرسة المعلمين قبل اتخاذ قراراته.","يقوم مدير المدرسة بزيارة المعلمين زيارة صفية.","يقوم مدير المدرسة المعلمين تقويما شاملا.",
+    "يوزع مدير المدرسة أنصبة المعلمين بطريقة عادلة.","يقدم مدير المدرسة ملاحظاته وتوجيهاته بطريقة مناسبة.","يمثل مدير المدرسة قدوة في الانضباط في العمل.",
+    "يستخدم مدير المدرسة أسلوب الثواب والعقاب.","يطلع مدير المدرسة المعلمين على التعليمات والنظم بشكل مستمر.","أجد رغبة في مساعدة المدرسة في الأزمات.",
+    "لا أجد حرجا في المشاركة في الأنشطة اللاصفية خارج وقت الدوام.","أرغب بزيارة مدير المدرسة لي زيارة صفية.","أرغب الانتقال من المدرسة إلى مدرسة أخرى."
+  ],
+  student_school_satisfaction: [
+    "تعتني المدرسة برفع مستوى تحصيل الطلاب.","تتيح المدرسة للطلاب فرص اكتشاف مواهبهم وقدراتهم.","تهتم المدرسة بنظافة الفصول ونظافة المدرسة بشكل عام.",
+    "تأخذ المدرسة بآراء الطلاب فيما يتعلق باحتياجاتهم.","تهتم المدرسة بنوعية الوجبات المقدمة في المقصف المدرسي.","تكرم المدرسة الطلبة المتميزين والمتفوقين.",
+    "تقيم المدرسة المناشط اللاصفية أثناء اليوم الدراسي وخارجه.","تعتني المدرسة بحل المشاكل التي تعترض الطلاب.","تشرك المدرسة الطلاب في إدارة اليوم الدراسي.",
+    "يستفيد الطلاب من قاعة مصادر التعلم الموجودة في المدرسة.","أشعر بتمام الراحة في مدرستي.","أتمنى أن أنتقل إلى مدرسة أخرى."
+  ],
+  parent_satisfaction: [
+    "تتواصل المدرسة مع أولياء الأمور لمشاركتهم في رؤية المدرسة ورسالتها.","أشعر باحترام وتقدير المدرسة عند تعاملها معي (كولي أمر طالب).",
+    "ألاحظ أن المدرسة تشجع طلابها على التميز في جميع المجالات.","تتاح لي فرصة المشاركة مع المدرسة في العملية التعليمية.",
+    "تحرص المدرسة على مشاركة أولياء الأمور في الرعاية الصحية للمتعلمين.","تحرص المدرسة على تيسير التواصل بين المعلمين والمتعلمين وأولياء الأمور من خلال الموقع الإلكتروني.",
+    "تستخدم المدرسة نظاماً لإعلام أولياء الأمور بمستوى تقدم أداء أبنائهم.","تحرص المدرسة على مشاركة أولياء الأمور في تطوير العملية التعليمية.",
+    "تنشر المدرسة ثقافة الإرشاد التربوي والنفسي بين أولياء الأمور.","توفر المدرسة لأولياء أمور الطلاب أرقاما للتواصل (ثابت – جوال)."
+  ],
+  student_teacher_satisfaction: [
+    "يحرص المعلم على توضيح الدرس بطريقة مناسبة.","يهتم المعلم بتوصيل المعلومة إلى الطالب.","يستخدم المعلم طرقا حديثة ومتنوعة في شرح الدروس.",
+    "ينوع المعلم في طرق تدريسه.","يعتني المعلم بالوسائل التعليمية عند عرض المعلومة.","يشجع المعلم الطلاب.",
+    "يبذل المعلم جهده لدفع الملل والسآمة عن الطلاب.","يأخذ المعلم بآراء الطلاب.","يقيم المعلم مع الطلاب علاقة صداقة.","يهتم المعلم بحل مشاكل الطلاب."
+  ]
+};
 
 async function ping(){
   const r = await fetch(`${APPS_SCRIPT_URL}?action=ping`);
@@ -155,11 +258,11 @@ async function ping(){
 }
 
 async function loadFromSheet(){
-  const token = tokenInput.value.trim();
+  const token = (tokenInput.value || "").trim();
   if(!token){ showErr("ضعي Admin Token أولًا."); return; }
 
-  const type = typeFilter.value.trim();
-  const q = searchText.value.trim();
+  const type = (typeFilter.value || "").trim();
+  const q = (searchText.value || "").trim();
   const limit = Number(limitSel.value||500);
 
   const u = new URL(APPS_SCRIPT_URL);
@@ -177,24 +280,81 @@ async function loadFromSheet(){
       throw new Error(json.error || "LOAD_FAILED");
     }
     allData = json.data || [];
-    render();
+    renderTable();
+    computeStats();
     showOk("تم تحميل النتائج ✅");
   }catch(e){
     console.error(e);
-    showErr("تعذر تحميل النتائج. تحققي من: نشر Web App (Anyone) + الصلاحيات + وجود sheets: responses/settings");
+    showErr("تعذر تحميل النتائج. تحققي من النشر Web App (Anyone) والصلاحيات.");
   }
 }
 
-function render(){
+function renderTable(){
   summaryLine.textContent = `عدد النتائج المعروضة: ${allData.length}`;
-  rowsEl.innerHTML = allData.map(x=>`
+  rowsEl.innerHTML = allData.map((x,idx)=>`
     <tr>
       <td>${esc(fmtType(x.type))}</td>
-      <td>${esc(x.createdAt||"")}</td>
+      <td class="mini">${esc(x.createdAt||"")}</td>
       <td>${esc(x.school||"—")}</td>
       <td>${rowBrief(x)}</td>
+      <td><span class="linklike" data-i="${idx}">عرض</span></td>
     </tr>
   `).join('');
+  rowsEl.querySelectorAll('[data-i]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const i = Number(el.getAttribute('data-i'));
+      openModal(allData[i]);
+    });
+  });
+}
+
+function computeStats(){
+  const total = allData.length;
+  document.getElementById("st_total").textContent = total;
+
+  const byType = {};
+  let impactCount = 0, sumImpactPct = 0, sumGoalPct = 0, cntImpactPct = 0, cntGoalPct = 0;
+
+  // Likert distribution across all satisfaction forms
+  const likertDist = { "دائماً":0, "غالباً":0, "أحياناً":0, "نادراً":0 };
+
+  allData.forEach(x=>{
+    const t = x.type || "unknown";
+    byType[t] = (byType[t]||0) + 1;
+
+    if(t === "impact"){
+      impactCount++;
+      const ep = Number(x.effectPct);
+      const gp = Number(x.goalPct);
+      if(!Number.isNaN(ep) && ep > 0){ sumImpactPct += ep; cntImpactPct++; }
+      if(!Number.isNaN(gp) && gp > 0){ sumGoalPct += gp; cntGoalPct++; }
+    }
+
+    const ans = safeJsonParse(x.answers);
+    if(ans && typeof ans === "object"){
+      Object.values(ans).forEach(v=>{
+        if(likertDist[v] != null) likertDist[v] += 1;
+      });
+    }
+  });
+
+  document.getElementById("st_impact").textContent = impactCount;
+  document.getElementById("st_avgImpactPct").textContent = cntImpactPct ? Math.round(sumImpactPct/cntImpactPct) + "%" : "—";
+  document.getElementById("st_avgGoalPct").textContent = cntGoalPct ? Math.round(sumGoalPct/cntGoalPct) + "%" : "—";
+
+  // counts by type chips
+  const box = document.getElementById("st_countsByType");
+  box.innerHTML = Object.entries(byType).map(([k,v])=>`<span class="bar"><b>${esc(fmtType(k))}</b>: ${v}</span>`).join("");
+
+  // likert chips
+  const lbox = document.getElementById("st_likertDist");
+  const totalLikert = Object.values(likertDist).reduce((a,b)=>a+b,0);
+  lbox.innerHTML = totalLikert
+    ? Object.entries(likertDist).map(([k,v])=>{
+        const pct = Math.round((v/totalLikert)*100);
+        return `<span class="bar"><b>${esc(k)}</b>: ${v} (${pct}%)</span>`;
+      }).join("")
+    : `<span class="hint">لا توجد بيانات استبانات كافية لعرض توزيع الإجابات.</span>`;
 }
 
 function exportCsv(){
@@ -212,6 +372,132 @@ function exportCsv(){
   URL.revokeObjectURL(url);
 }
 
+/** ===== Modal ===== */
+const backdrop = document.getElementById("backdrop");
+const modalBody = document.getElementById("modalBody");
+const modalTitle = document.getElementById("modalTitle");
+const closeX = document.getElementById("closeX");
+
+function openModal(x){
+  modalTitle.textContent = `استجابة — ${fmtType(x.type)} — ${x.createdAt || ""}`;
+
+  const tools = safeJsonParse(x.tools) || (typeof x.tools === "string" ? safeJsonParse(x.tools) : null);
+  const evidence = safeJsonParse(x.evidenceLinks) || (typeof x.evidenceLinks === "string" ? safeJsonParse(x.evidenceLinks) : null);
+  const answers = safeJsonParse(x.answers);
+  const meta = safeJsonParse(x.meta);
+
+  // Header fields
+  const headerFields = [
+    ["ID", x.id],
+    ["التاريخ", x.createdAt],
+    ["المدرسة", x.school],
+    ["النوع", fmtType(x.type)]
+  ];
+
+  // Type-specific fields
+  const extraFields = [];
+  if(x.type === "impact"){
+    extraFields.push(["اسم البرنامج", x.program]);
+    extraFields.push(["المجال", x.domain]);
+    extraFields.push(["المستهدفون", x.targets]);
+    extraFields.push(["الأداء العام", x.performance]);
+    extraFields.push(["مستوى الأثر", x.impactLevel]);
+    extraFields.push(["نسبة تحقق الأهداف", x.goalPct]);
+    extraFields.push(["النسبة المئوية للأثر", x.effectPct]);
+    extraFields.push(["أسلوب التنفيذ", x.method]);
+    extraFields.push(["تاريخ التنفيذ", x.date]);
+    extraFields.push(["الأسبوع", x.week]);
+    extraFields.push(["عدد الطلاب/الطالبات", x.nStudents]);
+    extraFields.push(["عدد المعلمين/المعلمات", x.nTeachers]);
+    extraFields.push(["عدد أولياء الأمور", x.nParents]);
+    extraFields.push(["مشاركة اللجنة", x.committee]);
+    extraFields.push(["الإيجابيات", x.positives]);
+    extraFields.push(["الصعوبات", x.challenges]);
+  } else if(x.type === "teacher_satisfaction"){
+    extraFields.push(["اسم المعلم (اختياري)", x.name]);
+    extraFields.push(["ملاحظات", x.notes]);
+  } else if(x.type === "student_school_satisfaction"){
+    extraFields.push(["اسم الطالب (اختياري)", x.name]);
+    extraFields.push(["الصف", x.grade]);
+    extraFields.push(["ملاحظات", x.notes]);
+  } else if(x.type === "parent_satisfaction"){
+    extraFields.push(["اسم ولي الأمر (اختياري)", x.parentName]);
+    extraFields.push(["المؤهل", x.education]);
+    extraFields.push(["اسم الطالب/الطالبة", x.studentName]);
+    extraFields.push(["ملاحظات", x.notes]);
+  } else if(x.type === "student_teacher_satisfaction"){
+    extraFields.push(["اسم الطالب (اختياري)", x.name]);
+    extraFields.push(["الصف", x.grade]);
+    extraFields.push(["المادة", x.subject]);
+    extraFields.push(["ملاحظات", x.notes]);
+  }
+
+  const toolsHtml = Array.isArray(tools) && tools.length
+    ? tools.map(t=>`<span class="pill">${esc(t)}</span>`).join('')
+    : `<span class="mini">—</span>`;
+
+  const evidenceHtml = Array.isArray(evidence) && evidence.length
+    ? evidence.map(u=>`<div class="mono">• ${esc(u)}</div>`).join('')
+    : `<span class="mini">—</span>`;
+
+  // Form-like answers with question text
+  let formAnswersHtml = `<div class="hint">—</div>`;
+  const qList = QUESTIONS[x.type];
+  if(answers && typeof answers === "object" && Array.isArray(qList) && qList.length){
+    formAnswersHtml = qList.map((qText, idx)=>{
+      const key = String(idx+1);
+      const a = answers[key] ?? answers[idx+1] ?? answers[key.trim()] ?? null;
+      return `
+        <div class="qItem">
+          <div class="q">${idx+1}) ${esc(qText)}</div>
+          <div class="a"><b>الإجابة:</b> ${esc(a || "—")}</div>
+        </div>
+      `;
+    }).join("");
+  } else if(answers && typeof answers === "object"){
+    // fallback: show raw keys
+    formAnswersHtml = Object.entries(answers).map(([k,v])=>`
+      <div class="qItem">
+        <div class="q">البند ${esc(k)}</div>
+        <div class="a"><b>الإجابة:</b> ${esc(v || "—")}</div>
+      </div>
+    `).join("");
+  }
+
+  const metaHtml = meta && typeof meta === "object"
+    ? `<div class="field"><div class="k">meta (معلومات الجهاز)</div><div class="v mono">${esc(JSON.stringify(meta, null, 2))}</div></div>`
+    : "";
+
+  modalBody.innerHTML = `
+    <div class="sectionTitle">بيانات الاستجابة</div>
+    ${headerFields.concat(extraFields).filter(([_,v])=>v!==undefined && v!==null && String(v).trim()!=="").map(([k,v])=>`
+      <div class="field"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>
+    `).join('')}
+
+    <div class="sectionTitle">أدوات / شواهد</div>
+    <div class="field"><div class="k">أدوات قياس الأثر</div><div class="v">${toolsHtml}</div></div>
+    <div class="field"><div class="k">روابط الشواهد</div><div class="v">${evidenceHtml}</div></div>
+
+    <div class="sectionTitle">الاستبانة (عرض كاستمارة)</div>
+    ${formAnswersHtml}
+
+    ${metaHtml}
+  `;
+
+  backdrop.style.display = "flex";
+  backdrop.setAttribute("aria-hidden","false");
+}
+
+function closeModal(){
+  backdrop.style.display = "none";
+  backdrop.setAttribute("aria-hidden","true");
+  modalBody.innerHTML = "";
+}
+
+closeX.addEventListener("click", closeModal);
+backdrop.addEventListener("click", (e)=>{ if(e.target === backdrop) closeModal(); });
+document.addEventListener("keydown", (e)=>{ if(e.key === "Escape" && backdrop.style.display === "flex") closeModal(); });
+
 document.getElementById("loadBtn").addEventListener("click", loadFromSheet);
 document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
 
@@ -221,7 +507,7 @@ document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
     const ok = await ping();
     statusLine.textContent = ok ? "✅ الاتصال جاهز" : "⚠️ لم يتم تأكيد الاتصال";
   }catch{
-    statusLine.textContent = "❌ تعذر الاتصال — راجعي النشر Web App (Anyone) والصلاحيات";
+    statusLine.textContent = "❌ تعذر الاتصال — راجعي النشر Web App (Anyone) والرابط";
   }
 })();
 </script>
