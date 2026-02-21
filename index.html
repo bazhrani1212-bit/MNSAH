@@ -40,7 +40,7 @@
       <h1>منصة قياس الأثر ورضا المستفيد</h1>
       <div class="sub">
         المدرسة: <b>الابتدائية السادسة والثلاثون بالخميس</b> — مديرة المدرسة: <b>نورة الرفاعي</b><br>
-        تعبئة الاستبانات من أي جهاز — النتائج تظهر فقط للمديرة (Admin)
+        تُحفظ الاستجابات مباشرة في Google Sheet (بدون Firebase).
       </div>
     </div>
   </div>
@@ -48,9 +48,9 @@
 
 <div class="wrap">
   <div class="card">
-    <div class="small">
-      🔒 الخصوصية: الاسم اختياري — يفضّل عدم كتابة أسماء كاملة للطلاب/الطالبات.
-    </div>
+    <div class="small">🔒 الخصوصية: الاسم اختياري — يفضّل عدم كتابة أسماء كاملة.</div>
+    <div class="hint" id="statusLine">⏳ فحص الاتصال…</div>
+    <a class="btn secondary" href="admin.html">لوحة المديرة</a>
   </div>
 
   <div class="tabs">
@@ -61,13 +61,12 @@
     <button class="tab" data-view="studentTeacher">رضا الطالب عن المعلم</button>
   </div>
 
-  <div class="ok" id="okBox">تم حفظ الاستجابة بنجاح ✅ شكرًا لك</div>
+  <div class="ok" id="okBox">تم حفظ الاستجابة بنجاح ✅</div>
   <div class="err" id="errBox"></div>
 
   <!-- ===== قياس الأثر ===== -->
   <section id="impact" class="card">
     <h2 style="margin:0 0 6px;">قياس أثر برنامج</h2>
-    <p class="hint">وثّقي أثر برنامج/مبادرة: مستوى الأثر، أدوات القياس، النسب، الشواهد…</p>
 
     <div class="row">
       <div>
@@ -187,16 +186,15 @@
     </div>
 
     <label>الإيجابيات</label>
-    <textarea id="impact_positives" placeholder="اكتبي أبرز الإيجابيات..."></textarea>
+    <textarea id="impact_positives"></textarea>
 
     <label>الصعوبات في التنفيذ</label>
-    <textarea id="impact_challenges" placeholder="اكتبي أبرز الصعوبات..."></textarea>
+    <textarea id="impact_challenges"></textarea>
 
-    <label>روابط الشواهد (صور/محاضر/فيديو...)</label>
-    <textarea id="impact_evidenceLinks" placeholder="ضعي الروابط كل رابط في سطر"></textarea>
+    <label>روابط الشواهد (كل رابط في سطر)</label>
+    <textarea id="impact_evidenceLinks"></textarea>
 
     <button class="btn" id="impact_submit">إرسال وحفظ</button>
-    <div class="hint" id="cooldownHint" style="display:none">⏳ تم الإرسال… انتظري قليلًا قبل إرسال استجابة جديدة.</div>
   </section>
 
   <!-- ===== رضا المعلم ===== -->
@@ -217,11 +215,10 @@
 
     <div id="t_items"></div>
 
-    <label>أمور أخرى تحب ذكرها</label>
+    <label>ملاحظات</label>
     <textarea id="t_notes"></textarea>
 
     <button class="btn" id="t_submit">إرسال وحفظ</button>
-    <div class="hint" id="cooldownHint2" style="display:none">⏳ تم الإرسال… انتظري قليلًا قبل إرسال استجابة جديدة.</div>
   </section>
 
   <!-- ===== رضا الطالب عن المدرسة ===== -->
@@ -244,11 +241,10 @@
 
     <div id="s_items"></div>
 
-    <label>أمور أخرى</label>
+    <label>ملاحظات</label>
     <textarea id="s_notes"></textarea>
 
     <button class="btn" id="s_submit">إرسال وحفظ</button>
-    <div class="hint" id="cooldownHint3" style="display:none">⏳ تم الإرسال… انتظري قليلًا قبل إرسال استجابة جديدة.</div>
   </section>
 
   <!-- ===== رضا ولي الأمر ===== -->
@@ -273,11 +269,10 @@
 
     <div id="p_items"></div>
 
-    <label>أمور أخرى</label>
+    <label>ملاحظات</label>
     <textarea id="p_notes"></textarea>
 
     <button class="btn" id="p_submit">إرسال وحفظ</button>
-    <div class="hint" id="cooldownHint4" style="display:none">⏳ تم الإرسال… انتظري قليلًا قبل إرسال استجابة جديدة.</div>
   </section>
 
   <!-- ===== رضا الطالب عن المعلم ===== -->
@@ -308,75 +303,81 @@
 
     <div id="st_items"></div>
 
-    <label>أمور أخرى</label>
+    <label>ملاحظات</label>
     <textarea id="st_notes"></textarea>
 
     <button class="btn" id="st_submit">إرسال وحفظ</button>
-    <div class="hint" id="cooldownHint5" style="display:none">⏳ تم الإرسال… انتظري قليلًا قبل إرسال استجابة جديدة.</div>
   </section>
-
-  <div class="card">
-    <h3 style="margin:0 0 8px;">لوحة النتائج (للمديرة فقط)</h3>
-    <p class="hint">هذه الصفحة خاصة بالإدارة وتحتاج تسجيل دخول.</p>
-    <a class="btn secondary" href="admin.html">فتح لوحة المديرة</a>
-  </div>
-
 </div>
 
-<footer>
-  تصميم/إعداد: بدرية الزهراني
-</footer>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<footer>تصميم/إعداد: بدرية الزهراني</footer>
 
 <script>
-/** ✅ ضعي بيانات Firebase هنا بدل FIREBASE_CONFIG_HERE */
-const firebaseConfig = FIREBASE_CONFIG_HERE;
+/** رابط Web App (مُثبت منك) */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZBgj7Qomh3858lXJWripmkFlKW_bcUD8POm7XXCuk6nAQJAc6EPZdFu8YOciaMdUM/exec";
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/** UI messages */
+/** UI */
 const okBox = document.getElementById('okBox');
 const errBox = document.getElementById('errBox');
-function showOk(msg="تم حفظ الاستجابة بنجاح ✅ شكرًا لك"){
+const statusLine = document.getElementById('statusLine');
+
+function showOk(msg="تم حفظ الاستجابة بنجاح ✅"){
   okBox.textContent=msg; okBox.style.display='block'; errBox.style.display='none';
   setTimeout(()=>okBox.style.display='none', 3500);
 }
-function showErr(msg="تعذر الحفظ. تحققي من اتصال الإنترنت أو إعدادات Firebase/Firestore Rules."){
+function showErr(msg){
   errBox.textContent=msg; errBox.style.display='block'; okBox.style.display='none';
   setTimeout(()=>errBox.style.display='none', 6500);
 }
 
-/** Cooldown */
-const COOLDOWN_MS = 12000;
-function inCooldown(){
-  const t = Number(localStorage.getItem("lastSubmitAt")||0);
-  return Date.now()-t < COOLDOWN_MS;
-}
-function setCooldown(){ localStorage.setItem("lastSubmitAt", String(Date.now())); }
-function showCooldownHint(elId){
-  const el = document.getElementById(elId);
-  el.style.display = 'block';
-  setTimeout(()=>el.style.display='none', 5000);
-}
-
-/** anonymous device id */
-function getAnonId(){
-  let id = localStorage.getItem("anonId");
-  if(!id){
-    id = "anon_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
-    localStorage.setItem("anonId", id);
-  }
-  return id;
-}
-
-/** helpers */
+function requiredFilled(...vals){ return vals.every(v => (v||"").trim().length>0); }
 function getCheckedValues(containerId){
   return [...document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)].map(x=>x.value);
 }
+function nowISO(){ return new Date().toISOString(); }
+function getAnonId(){
+  let id = localStorage.getItem("anonId");
+  if(!id){ id = "anon_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); localStorage.setItem("anonId", id); }
+  return id;
+}
+function deviceMeta(){
+  return { anonymousId:getAnonId(), ua:navigator.userAgent, lang:navigator.language, tz:Intl.DateTimeFormat().resolvedOptions().timeZone||null, page:location.pathname };
+}
+
+async function ping(){
+  const r = await fetch(`${APPS_SCRIPT_URL}?action=ping`);
+  const j = await r.json();
+  return !!j?.ok;
+}
+
+async function postToSheet(payload){
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=submit`, {
+    method: "POST",
+    headers: {"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify(payload)
+  });
+  const json = await res.json().catch(()=>null);
+  if(!json || !json.ok) throw new Error(json?.error || "SAVE_FAILED");
+  return json;
+}
+
+/** Tabs */
+const tabs = document.querySelectorAll('.tab');
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+    document.querySelectorAll('section.card').forEach(sec=>{
+      if(['impact','teachers','students','parents','studentTeacher'].includes(sec.id)){
+        sec.style.display = (sec.id===view)?'block':'none';
+      }
+    });
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+});
+
+/** Likert builders */
 function buildLikertList(container, items){
   container.innerHTML = items.map((t,i)=>`
     <div style="padding:10px; border:1px solid #eef2f7; border-radius:12px; margin:10px 0;">
@@ -397,114 +398,32 @@ function readLikertAnswers(container){
   selects.forEach(s=>{ answers[s.getAttribute('data-q')] = s.value || null; });
   return answers;
 }
-function deviceMeta(){
-  return {
-    anonymousId: getAnonId(),
-    ua: navigator.userAgent,
-    lang: navigator.language,
-    tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
-    page: location.pathname
-  };
-}
-function requiredFilled(...vals){ return vals.every(v => (v||"").trim().length>0); }
 
-/** Save */
-async function saveResponse(payload){
-  if(inCooldown()){
-    showErr("تم الإرسال قبل قليل. الرجاء الانتظار ثم المحاولة مرة أخرى.");
-    return false;
-  }
-  try{
-    await db.collection('responses').add({
-      schemaVersion: 3,
-      ...payload,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      meta: deviceMeta()
-    });
-    setCooldown();
-    showOk();
-    return true;
-  }catch(e){
-    console.error(e);
-    showErr();
-    return false;
-  }
-}
-
-/** ---- Tabs ---- */
-const tabs = document.querySelectorAll('.tab');
-tabs.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    tabs.forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const view = btn.dataset.view;
-    document.querySelectorAll('section.card').forEach(sec=>{
-      if(['impact','teachers','students','parents','studentTeacher'].includes(sec.id)){
-        sec.style.display = (sec.id===view)?'block':'none';
-      }
-    });
-    window.scrollTo({top:0, behavior:"smooth"});
-  });
-});
-
-/** ---- Likert items ---- */
 const teacherItems = [
-  "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.",
-  "يعدل مدير المدرسة في تعامله بين المعلمين.",
-  "يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
-  "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.",
-  "يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.",
-  "يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
-  "يستشير مدير المدرسة المعلمين قبل اتخاذ قراراته.",
-  "يقوم مدير المدرسة بزيارة المعلمين زيارة صفية.",
-  "يقوم مدير المدرسة المعلمين تقويما شاملا.",
-  "يوزع مدير المدرسة أنصبة المعلمين بطريقة عادلة.",
-  "يقدم مدير المدرسة ملاحظاته وتوجيهاته بطريقة مناسبة.",
-  "يمثل مدير المدرسة قدوة في الانضباط في العمل.",
-  "يستخدم مدير المدرسة أسلوب الثواب والعقاب.",
-  "يطلع مدير المدرسة المعلمين على التعليمات والنظم بشكل مستمر.",
-  "أجد رغبة في مساعدة المدرسة في الأزمات.",
-  "لا أجد حرجا في المشاركة في الأنشطة اللاصفية خارج وقت الدوام.",
-  "أرغب بزيارة مدير المدرسة لي زيارة صفية.",
-  "أرغب الانتقال من المدرسة إلى مدرسة أخرى."
+  "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.","يعدل مدير المدرسة في تعامله بين المعلمين.","يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
+  "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.","يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.","يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
+  "يستشير مدير المدرسة المعلمين قبل اتخاذ قراراته.","يقوم مدير المدرسة بزيارة المعلمين زيارة صفية.","يقوم مدير المدرسة المعلمين تقويما شاملا.",
+  "يوزع مدير المدرسة أنصبة المعلمين بطريقة عادلة.","يقدم مدير المدرسة ملاحظاته وتوجيهاته بطريقة مناسبة.","يمثل مدير المدرسة قدوة في الانضباط في العمل.",
+  "يستخدم مدير المدرسة أسلوب الثواب والعقاب.","يطلع مدير المدرسة المعلمين على التعليمات والنظم بشكل مستمر.","أجد رغبة في مساعدة المدرسة في الأزمات.",
+  "لا أجد حرجا في المشاركة في الأنشطة اللاصفية خارج وقت الدوام.","أرغب بزيارة مدير المدرسة لي زيارة صفية.","أرغب الانتقال من المدرسة إلى مدرسة أخرى."
 ];
 const studentSchoolItems = [
-  "تعتني المدرسة برفع مستوى تحصيل الطلاب.",
-  "تتيح المدرسة للطلاب فرص اكتشاف مواهبهم وقدراتهم.",
-  "تهتم المدرسة بنظافة الفصول ونظافة المدرسة بشكل عام.",
-  "تأخذ المدرسة بآراء الطلاب فيما يتعلق باحتياجاتهم.",
-  "تهتم المدرسة بنوعية الوجبات المقدمة في المقصف المدرسي.",
-  "تكرم المدرسة الطلبة المتميزين والمتفوقين.",
-  "تقيم المدرسة المناشط اللاصفية أثناء اليوم الدراسي وخارجه.",
-  "تعتني المدرسة بحل المشاكل التي تعترض الطلاب.",
-  "تشرك المدرسة الطلاب في إدارة اليوم الدراسي.",
-  "يستفيد الطلاب من قاعة مصادر التعلم الموجودة في المدرسة.",
-  "أشعر بتمام الراحة في مدرستي.",
-  "أتمنى أن أنتقل إلى مدرسة أخرى."
+  "تعتني المدرسة برفع مستوى تحصيل الطلاب.","تتيح المدرسة للطلاب فرص اكتشاف مواهبهم وقدراتهم.","تهتم المدرسة بنظافة الفصول ونظافة المدرسة بشكل عام.",
+  "تأخذ المدرسة بآراء الطلاب فيما يتعلق باحتياجاتهم.","تهتم المدرسة بنوعية الوجبات المقدمة في المقصف المدرسي.","تكرم المدرسة الطلبة المتميزين والمتفوقين.",
+  "تقيم المدرسة المناشط اللاصفية أثناء اليوم الدراسي وخارجه.","تعتني المدرسة بحل المشاكل التي تعترض الطلاب.","تشرك المدرسة الطلاب في إدارة اليوم الدراسي.",
+  "يستفيد الطلاب من قاعة مصادر التعلم الموجودة في المدرسة.","أشعر بتمام الراحة في مدرستي.","أتمنى أن أنتقل إلى مدرسة أخرى."
 ];
 const parentItems = [
-  "تتواصل المدرسة مع أولياء الأمور لمشاركتهم في رؤية المدرسة ورسالتها.",
-  "أشعر باحترام وتقدير المدرسة عند تعاملها معي (كولي أمر طالب).",
-  "ألاحظ أن المدرسة تشجع طلابها على التميز في جميع المجالات.",
-  "تتاح لي فرصة المشاركة مع المدرسة في العملية التعليمية.",
-  "تحرص المدرسة على مشاركة أولياء الأمور في الرعاية الصحية للمتعلمين.",
-  "تحرص المدرسة على تيسير التواصل بين المعلمين والمتعلمين وأولياء الأمور من خلال الموقع الإلكتروني.",
-  "تستخدم المدرسة نظاماً لإعلام أولياء الأمور بمستوى تقدم أداء أبنائهم.",
-  "تحرص المدرسة على مشاركة أولياء الأمور في تطوير العملية التعليمية.",
-  "تنشر المدرسة ثقافة الإرشاد التربوي والنفسي بين أولياء الأمور.",
-  "توفر المدرسة لأولياء أمور الطلاب أرقاما للتواصل (ثابت – جوال)."
+  "تتواصل المدرسة مع أولياء الأمور لمشاركتهم في رؤية المدرسة ورسالتها.","أشعر باحترام وتقدير المدرسة عند تعاملها معي (كولي أمر طالب).",
+  "ألاحظ أن المدرسة تشجع طلابها على التميز في جميع المجالات.","تتاح لي فرصة المشاركة مع المدرسة في العملية التعليمية.",
+  "تحرص المدرسة على مشاركة أولياء الأمور في الرعاية الصحية للمتعلمين.","تحرص المدرسة على تيسير التواصل بين المعلمين والمتعلمين وأولياء الأمور من خلال الموقع الإلكتروني.",
+  "تستخدم المدرسة نظاماً لإعلام أولياء الأمور بمستوى تقدم أداء أبنائهم.","تحرص المدرسة على مشاركة أولياء الأمور في تطوير العملية التعليمية.",
+  "تنشر المدرسة ثقافة الإرشاد التربوي والنفسي بين أولياء الأمور.","توفر المدرسة لأولياء أمور الطلاب أرقاما للتواصل (ثابت – جوال)."
 ];
 const studentTeacherItems = [
-  "يحرص المعلم على توضيح الدرس بطريقة مناسبة.",
-  "يهتم المعلم بتوصيل المعلومة إلى الطالب.",
-  "يستخدم المعلم طرقا حديثة ومتنوعة في شرح الدروس.",
-  "ينوع المعلم في طرق تدريسه.",
-  "يعتني المعلم بالوسائل التعليمية عند عرض المعلومة.",
-  "يشجع المعلم الطلاب.",
-  "يبذل المعلم جهده لدفع الملل والسآمة عن الطلاب.",
-  "يأخذ المعلم بآراء الطلاب.",
-  "يقيم المعلم مع الطلاب علاقة صداقة.",
-  "يهتم المعلم بحل مشاكل الطلاب."
+  "يحرص المعلم على توضيح الدرس بطريقة مناسبة.","يهتم المعلم بتوصيل المعلومة إلى الطالب.","يستخدم المعلم طرقا حديثة ومتنوعة في شرح الدروس.",
+  "ينوع المعلم في طرق تدريسه.","يعتني المعلم بالوسائل التعليمية عند عرض المعلومة.","يشجع المعلم الطلاب.",
+  "يبذل المعلم جهده لدفع الملل والسآمة عن الطلاب.","يأخذ المعلم بآراء الطلاب.","يقيم المعلم مع الطلاب علاقة صداقة.","يهتم المعلم بحل مشاكل الطلاب."
 ];
 
 buildLikertList(document.getElementById('t_items'), teacherItems);
@@ -512,95 +431,110 @@ buildLikertList(document.getElementById('s_items'), studentSchoolItems);
 buildLikertList(document.getElementById('p_items'), parentItems);
 buildLikertList(document.getElementById('st_items'), studentTeacherItems);
 
-/** ---- Submit handlers ---- */
+/** Submit wrapper */
+async function safeSubmit(payload){
+  try{
+    payload.id = payload.id || ("r_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16));
+    payload.createdAt = nowISO();
+    payload.meta = deviceMeta();
+    await postToSheet(payload);
+    showOk("تم حفظ الاستجابة في Google Sheet ✅ شكرًا لك");
+  }catch(e){
+    console.error(e);
+    showErr("تعذر الحفظ. تأكدي من: نشر Web App (Anyone) + الصلاحيات + وجود sheets: responses/settings");
+  }
+}
+
+/** Handlers */
 document.getElementById('impact_submit').addEventListener('click', async ()=>{
   const school = document.getElementById('impact_school').value.trim();
   const program = document.getElementById('impact_program').value.trim();
-  if(!requiredFilled(school, program)){
-    showErr("فضلاً أدخلي اسم المدرسة واسم البرنامج (مطلوبان).");
-    return;
-  }
-  const payload = {
+  if(!requiredFilled(school, program)){ showErr("فضلاً أدخلي اسم المدرسة واسم البرنامج (مطلوبان)."); return; }
+  await safeSubmit({
     type:"impact",
     school, program,
-    domain: document.getElementById('impact_domain').value || null,
+    domain: document.getElementById('impact_domain').value || "",
     targets: document.getElementById('impact_targets').value.trim(),
-    performance: document.getElementById('impact_perf').value || null,
-    impactLevel: document.getElementById('impact_level').value || null,
+    performance: document.getElementById('impact_perf').value || "",
+    impactLevel: document.getElementById('impact_level').value || "",
     goalPct: Number(document.getElementById('impact_goalPct').value || 0),
     effectPct: Number(document.getElementById('impact_effectPct').value || 0),
     tools: getCheckedValues('impact_tools'),
-    method: document.getElementById('impact_method').value || null,
-    date: document.getElementById('impact_date').value || null,
+    method: document.getElementById('impact_method').value || "",
+    date: document.getElementById('impact_date').value || "",
     week: document.getElementById('impact_week').value.trim(),
     nStudents: Number(document.getElementById('impact_nStudents').value || 0),
     nTeachers: Number(document.getElementById('impact_nTeachers').value || 0),
     nParents: Number(document.getElementById('impact_nParents').value || 0),
-    committee: document.getElementById('impact_committee').value || null,
+    committee: document.getElementById('impact_committee').value || "",
     positives: document.getElementById('impact_positives').value.trim(),
     challenges: document.getElementById('impact_challenges').value.trim(),
     evidenceLinks: document.getElementById('impact_evidenceLinks').value.split('\n').map(x=>x.trim()).filter(Boolean),
-  };
-  const ok = await saveResponse(payload);
-  if(ok) showCooldownHint("cooldownHint");
+  });
 });
 
 document.getElementById('t_submit').addEventListener('click', async ()=>{
   const school = document.getElementById('t_school').value.trim();
   if(!requiredFilled(school)){ showErr("فضلاً أدخل/ي اسم المدرسة (مطلوب)."); return; }
-  const ok = await saveResponse({
+  await safeSubmit({
     type:"teacher_satisfaction",
     school,
-    name: document.getElementById('t_name').value.trim() || null,
+    name: document.getElementById('t_name').value.trim(),
     answers: readLikertAnswers(document.getElementById('t_items')),
     notes: document.getElementById('t_notes').value.trim()
   });
-  if(ok) showCooldownHint("cooldownHint2");
 });
 
 document.getElementById('s_submit').addEventListener('click', async ()=>{
   const school = document.getElementById('s_school').value.trim();
   if(!requiredFilled(school)){ showErr("فضلاً أدخل/ي اسم المدرسة (مطلوب)."); return; }
-  const ok = await saveResponse({
+  await safeSubmit({
     type:"student_school_satisfaction",
     school,
     grade: document.getElementById('s_grade').value.trim(),
-    name: document.getElementById('s_name').value.trim() || null,
+    name: document.getElementById('s_name').value.trim(),
     answers: readLikertAnswers(document.getElementById('s_items')),
     notes: document.getElementById('s_notes').value.trim()
   });
-  if(ok) showCooldownHint("cooldownHint3");
 });
 
 document.getElementById('p_submit').addEventListener('click', async ()=>{
   const school = document.getElementById('p_school').value.trim();
   if(!requiredFilled(school)){ showErr("فضلاً أدخل/ي اسم المدرسة (مطلوب)."); return; }
-  const ok = await saveResponse({
+  await safeSubmit({
     type:"parent_satisfaction",
     school,
-    parentName: document.getElementById('p_name').value.trim() || null,
-    education: document.getElementById('p_edu').value.trim() || null,
-    studentName: document.getElementById('p_student').value.trim() || null,
+    parentName: document.getElementById('p_name').value.trim(),
+    education: document.getElementById('p_edu').value.trim(),
+    studentName: document.getElementById('p_student').value.trim(),
     answers: readLikertAnswers(document.getElementById('p_items')),
     notes: document.getElementById('p_notes').value.trim()
   });
-  if(ok) showCooldownHint("cooldownHint4");
 });
 
 document.getElementById('st_submit').addEventListener('click', async ()=>{
   const school = document.getElementById('st_school').value.trim();
   if(!requiredFilled(school)){ showErr("فضلاً أدخل/ي اسم المدرسة (مطلوب)."); return; }
-  const ok = await saveResponse({
+  await safeSubmit({
     type:"student_teacher_satisfaction",
     school,
     subject: document.getElementById('st_subject').value.trim(),
     grade: document.getElementById('st_grade').value.trim(),
-    name: document.getElementById('st_name').value.trim() || null,
+    name: document.getElementById('st_name').value.trim(),
     answers: readLikertAnswers(document.getElementById('st_items')),
     notes: document.getElementById('st_notes').value.trim()
   });
-  if(ok) showCooldownHint("cooldownHint5");
 });
+
+/** Status */
+(async ()=>{
+  try{
+    const ok = await ping();
+    statusLine.textContent = ok ? "✅ الاتصال جاهز والحفظ سيعمل" : "⚠️ الرابط موجود لكن لم يتم تأكيد الاتصال";
+  }catch{
+    statusLine.textContent = "❌ تعذر الاتصال — راجعي النشر Web App (Anyone) والصلاحيات";
+  }
+})();
 </script>
 </body>
 </html>
