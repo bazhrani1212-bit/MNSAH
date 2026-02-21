@@ -9,8 +9,9 @@
     header{background:#334155; color:#fff; padding:14px 12px;}
     .wrap{max-width:1200px; margin:0 auto; padding:14px;}
     .card{background:#fff; border-radius:14px; padding:14px; box-shadow:0 1px 8px rgba(0,0,0,.06); margin:10px 0;}
-    .btn{border:0; background:#0f766e; color:#fff; padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:900}
+    .btn{border:0; background:#0f766e; color:#fff; padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:1000}
     .btn.gray{background:#475569}
+    .btn.danger{background:#dc2626}
     input,select{padding:10px; border-radius:10px; border:1px solid #d0d7de; width:100%}
     .row{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px}
     @media(max-width:1100px){.row{grid-template-columns:1fr 1fr}}
@@ -22,15 +23,13 @@
     .ok,.err{display:none; padding:10px; border-radius:12px; margin:10px 0}
     .ok{background:#ecfdf5; border:1px solid #10b981; color:#065f46;}
     .err{background:#fef2f2; border:1px solid #ef4444; color:#7f1d1d;}
-    .linklike{color:#0f766e; font-weight:900; cursor:pointer; text-decoration:underline}
-
+    .linklike{color:#0f766e; font-weight:1000; cursor:pointer; text-decoration:underline}
     .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
     @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:700px){.stats{grid-template-columns:1fr;}}
     .stat{border:1px solid #eef2f7; border-radius:14px; padding:12px;}
     .stat .k{color:#64748b; font-size:12px; margin-bottom:6px;}
     .stat .v{font-weight:1000; font-size:18px;}
-
     .backdrop{position:fixed; inset:0; background:rgba(15,23,42,.55); display:none; align-items:center; justify-content:center; padding:14px; z-index:9999;}
     .modal{max-width:900px; width:100%; background:#fff; border-radius:16px; overflow:hidden;}
     .modalHead{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;}
@@ -44,7 +43,7 @@
 <header>
   <div class="wrap">
     <div style="font-weight:1000">لوحة المديرة — منصة قياس الأثر ورضا المستفيد</div>
-    <div style="opacity:.95;font-size:13px;line-height:1.5;">
+    <div style="opacity:.95;font-size:13px;line-height:1.6;">
       المدرسة: <b>الابتدائية السادسة والثلاثون بالخميس</b> — مديرة المدرسة: <b>نورة الرفاعي</b>
     </div>
   </div>
@@ -57,12 +56,13 @@
   <div class="card">
     <button class="btn gray" id="goHomeBtn">العودة للنماذج</button>
     <button class="btn" id="loadBtn">تحميل النتائج</button>
-    <div class="hint" id="statusLine">جاهز</div>
+    <button class="btn gray" id="exportBtn">تصدير CSV</button>
+    <div class="hint" id="statusLine" style="margin-top:10px;">جاهز</div>
   </div>
 
   <div class="card">
     <div class="row">
-      <div><label class="hint">Admin Token</label><input id="tokenInput"></div>
+      <div><label class="hint">Admin Token</label><input id="tokenInput" placeholder="مثل: B36-Admin2026"></div>
       <div>
         <label class="hint">النوع</label>
         <select id="typeFilter">
@@ -74,10 +74,10 @@
           <option value="student_teacher_satisfaction">رضا الطالب عن المعلم</option>
         </select>
       </div>
-      <div><label class="hint">بحث</label><input id="searchText"></div>
+      <div><label class="hint">بحث</label><input id="searchText" placeholder="برنامج/أثر/ملاحظات…"></div>
       <div>
         <label class="hint">الحد</label>
-        <select id="limitSel"><option>200</option><option selected>500</option><option>1000</option></select>
+        <select id="limitSel"><option>200</option><option selected>500</option><option>1000</option><option>2000</option></select>
       </div>
     </div>
   </div>
@@ -90,13 +90,14 @@
       <div class="stat"><div class="k">متوسط % الأثر</div><div class="v" id="st_avgImpactPct">—</div></div>
       <div class="stat"><div class="k">متوسط تحقق الأهداف</div><div class="v" id="st_avgGoalPct">—</div></div>
     </div>
+    <div class="hint" style="margin-top:8px;">* الإحصائيات تتغير حسب الفلاتر.</div>
   </div>
 
   <div class="card">
     <div class="hint" id="summaryLine">—</div>
     <div style="overflow:auto;margin-top:10px">
       <table>
-        <thead><tr><th>النوع</th><th>التاريخ</th><th>المدرسة</th><th>عرض</th></tr></thead>
+        <thead><tr><th>النوع</th><th>التاريخ</th><th>المدرسة</th><th>مختصر</th><th>عرض</th></tr></thead>
         <tbody id="rows"></tbody>
       </table>
     </div>
@@ -109,7 +110,10 @@
   <div class="modal">
     <div class="modalHead">
       <div id="modalTitle" style="font-weight:1000">استجابة</div>
-      <button class="closeX" id="closeX">✕</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn danger" id="deleteBtn" style="display:none;">حذف</button>
+        <button class="closeX" id="closeX">✕</button>
+      </div>
     </div>
     <div class="modalBody" id="modalBody"></div>
   </div>
@@ -134,13 +138,42 @@ function fmtType(t){
 }
 function safeJson(v){ try{ return JSON.parse(v); }catch{ return null; } }
 
+const QUESTIONS = {
+  teacher_satisfaction: [
+    "مدير المدرسة قريب من المعلمين ويعاملهم كأخوة.","يعدل مدير المدرسة في تعامله بين المعلمين.","يقوم مدير المدرسة بتكريم المتميزين من المعلمين.",
+    "يقدر مدير المدرسة ظروف المعلم إذا أخبره بها.","يتيح مدير المدرسة للمعلمين فرصا لتطوير مستواهم.","يشجع مدير المدرسة المعلمين المناسبين للتقدم للعمل الإداري.",
+    "يستشير مدير المدرسة المعلمين قبل اتخاذ قراراته.","يقوم مدير المدرسة بزيارة المعلمين زيارة صفية.","يقوم مدير المدرسة المعلمين تقويما شاملا.",
+    "يوزع مدير المدرسة أنصبة المعلمين بطريقة عادلة.","يقدم مدير المدرسة ملاحظاته وتوجيهاته بطريقة مناسبة.","يمثل مدير المدرسة قدوة في الانضباط في العمل.",
+    "يستخدم مدير المدرسة أسلوب الثواب والعقاب.","يطلع مدير المدرسة المعلمين على التعليمات والنظم بشكل مستمر.","أجد رغبة في مساعدة المدرسة في الأزمات.",
+    "لا أجد حرجا في المشاركة في الأنشطة اللاصفية خارج وقت الدوام.","أرغب بزيارة مدير المدرسة لي زيارة صفية.","أرغب الانتقال من المدرسة إلى مدرسة أخرى."
+  ],
+  student_school_satisfaction: [
+    "تعتني المدرسة برفع مستوى تحصيل الطلاب.","تتيح المدرسة للطلاب فرص اكتشاف مواهبهم وقدراتهم.","تهتم المدرسة بنظافة الفصول ونظافة المدرسة بشكل عام.",
+    "تأخذ المدرسة بآراء الطلاب فيما يتعلق باحتياجاتهم.","تهتم المدرسة بنوعية الوجبات المقدمة في المقصف المدرسي.","تكرم المدرسة الطلبة المتميزين والمتفوقين.",
+    "تقيم المدرسة المناشط اللاصفية أثناء اليوم الدراسي وخارجه.","تعتني المدرسة بحل المشاكل التي تعترض الطلاب.","تشرك المدرسة الطلاب في إدارة اليوم الدراسي.",
+    "يستفيد الطلاب من قاعة مصادر التعلم الموجودة في المدرسة.","أشعر بتمام الراحة في مدرستي.","أتمنى أن أنتقل إلى مدرسة أخرى."
+  ],
+  parent_satisfaction: [
+    "تتواصل المدرسة مع أولياء الأمور لمشاركتهم في رؤية المدرسة ورسالتها.","أشعر باحترام وتقدير المدرسة عند تعاملها معي (كولي أمر طالب).",
+    "ألاحظ أن المدرسة تشجع طلابها على التميز في جميع المجالات.","تتاح لي فرصة المشاركة مع المدرسة في العملية التعليمية.",
+    "تحرص المدرسة على مشاركة أولياء الأمور في الرعاية الصحية للمتعلمين.","تحرص المدرسة على تيسير التواصل بين المعلمين والمتعلمين وأولياء الأمور من خلال الموقع الإلكتروني.",
+    "تستخدم المدرسة نظاماً لإعلام أولياء الأمور بمستوى تقدم أداء أبنائهم.","تحرص المدرسة على مشاركة أولياء الأمور في تطوير العملية التعليمية.",
+    "تنشر المدرسة ثقافة الإرشاد التربوي والنفسي بين أولياء الأمور.","توفر المدرسة لأولياء أمور الطلاب أرقاما للتواصل (ثابت – جوال)."
+  ],
+  student_teacher_satisfaction: [
+    "يحرص المعلم على توضيح الدرس بطريقة مناسبة.","يهتم المعلم بتوصيل المعلومة إلى الطالب.","يستخدم المعلم طرقا حديثة ومتنوعة في شرح الدروس.",
+    "ينوع المعلم في طرق تدريسه.","يعتني المعلم بالوسائل التعليمية عند عرض المعلومة.","يشجع المعلم الطلاب.",
+    "يبذل المعلم جهده لدفع الملل والسآمة عن الطلاب.","يأخذ المعلم بآراء الطلاب.","يقيم المعلم مع الطلاب علاقة صداقة.","يهتم المعلم بحل مشاكل الطلاب."
+  ]
+};
+
 let allData = [];
+let currentItem = null;
 
 function loadJSONP(url, cbName){
   return new Promise((resolve, reject)=>{
     const s = document.createElement("script");
-    s.src = url;
-    s.async = true;
+    s.src = url; s.async = true;
     s.onerror = () => reject(new Error("JSONP_LOAD_FAILED"));
     window[cbName] = (data)=>{ resolve(data); cleanup(); };
     function cleanup(){
@@ -185,6 +218,15 @@ async function loadFromSheet(){
   }
 }
 
+function rowBrief(x){
+  if(x.type==="impact"){
+    return `برنامج: ${x.program||"—"} | %الأثر: ${x.effectPct||"—"}`;
+  }
+  const ans = typeof x.answers==="string" ? safeJson(x.answers) : x.answers;
+  const n = ans ? Object.values(ans).filter(Boolean).length : 0;
+  return `بنود مجابة: ${n}`;
+}
+
 function render(){
   document.getElementById("summaryLine").textContent = "عدد النتائج: " + allData.length;
   const rows = document.getElementById("rows");
@@ -193,6 +235,7 @@ function render(){
       <td>${esc(fmtType(x.type))}</td>
       <td>${esc(x.createdAt||"")}</td>
       <td>${esc(x.school||"")}</td>
+      <td>${esc(rowBrief(x))}</td>
       <td><span class="linklike" data-i="${i}">عرض</span></td>
     </tr>
   `).join("");
@@ -219,40 +262,106 @@ function stats(){
 const backdrop = document.getElementById("backdrop");
 const modalBody = document.getElementById("modalBody");
 const modalTitle = document.getElementById("modalTitle");
+const deleteBtn = document.getElementById("deleteBtn");
+
 document.getElementById("closeX").addEventListener("click", closeModal);
 backdrop.addEventListener("click", (e)=>{ if(e.target===backdrop) closeModal(); });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && backdrop.style.display==="flex") closeModal(); });
 
 function openModal(x){
+  currentItem = x;
   modalTitle.textContent = `استجابة — ${fmtType(x.type)} — ${x.createdAt||""}`;
+
+  deleteBtn.style.display = x?.id ? "inline-block" : "none";
+
   const answers = typeof x.answers==="string" ? safeJson(x.answers) : x.answers;
+  const qList = QUESTIONS[x.type];
 
   let formHtml = "";
-  if(answers && typeof answers==="object"){
+  if(answers && qList && Array.isArray(qList)){
+    formHtml = qList.map((q, idx)=>{
+      const key = String(idx+1);
+      return `<div class="qItem"><b>${idx+1}) ${esc(q)}</b><div>الإجابة: ${esc(answers[key]||"—")}</div></div>`;
+    }).join("");
+  } else if(answers && typeof answers==="object"){
     formHtml = Object.entries(answers).map(([k,v])=>`
-      <div class="qItem"><div><b>البند ${esc(k)}</b></div><div>الإجابة: ${esc(v||"—")}</div></div>
+      <div class="qItem"><b>البند ${esc(k)}</b><div>الإجابة: ${esc(v||"—")}</div></div>
     `).join("");
-  } else {
-    formHtml = `<div class="hint">لا توجد إجابات بنود</div>`;
   }
 
   modalBody.innerHTML = `
+    <div class="qItem"><b>ID:</b> ${esc(x.id||"")}</div>
     <div class="qItem"><b>المدرسة:</b> ${esc(x.school||"")}</div>
     <div class="qItem"><b>النوع:</b> ${esc(fmtType(x.type))}</div>
+
     ${x.type==="impact" ? `
       <div class="qItem"><b>البرنامج:</b> ${esc(x.program||"")}</div>
+      <div class="qItem"><b>المجال:</b> ${esc(x.domain||"")}</div>
+      <div class="qItem"><b>المستهدفون:</b> ${esc(x.targets||"")}</div>
       <div class="qItem"><b>% الأثر:</b> ${esc(x.effectPct||"")}</div>
       <div class="qItem"><b>% تحقق الأهداف:</b> ${esc(x.goalPct||"")}</div>
-      <div class="qItem"><b>إيجابيات:</b><br>${esc(x.positives||"")}</div>
-      <div class="qItem"><b>صعوبات:</b><br>${esc(x.challenges||"")}</div>
+      <div class="qItem"><b>الإيجابيات:</b><br>${esc(x.positives||"")}</div>
+      <div class="qItem"><b>الصعوبات:</b><br>${esc(x.challenges||"")}</div>
     ` : `
       <div style="margin-top:10px;font-weight:1000;">الاستبانة</div>
-      ${formHtml}
+      ${formHtml || `<div class="hint">لا توجد إجابات.</div>`}
     `}
   `;
+
   backdrop.style.display="flex";
 }
-function closeModal(){ backdrop.style.display="none"; modalBody.innerHTML=""; }
+
+function closeModal(){
+  backdrop.style.display="none";
+  modalBody.innerHTML="";
+  currentItem = null;
+}
+
+/** Delete */
+deleteBtn.addEventListener("click", async ()=>{
+  const token = document.getElementById("tokenInput").value.trim();
+  if(!token){ showErr("ضعي Admin Token"); return; }
+  if(!currentItem?.id) return;
+
+  if(!confirm("هل تريدين حذف هذه الاستجابة؟")) return;
+
+  const cbName = "cb_del_" + Math.random().toString(16).slice(2);
+  const u = new URL(APPS_SCRIPT_URL);
+  u.searchParams.set("action","delete");
+  u.searchParams.set("token", token);
+  u.searchParams.set("id", currentItem.id);
+  u.searchParams.set("callback", cbName);
+
+  try{
+    const json = await loadJSONP(u.toString(), cbName);
+    if(!json.ok){
+      showErr(json.error || "فشل الحذف");
+      return;
+    }
+    showOk("تم حذف الاستجابة ✅");
+    closeModal();
+    await loadFromSheet();
+  }catch(e){
+    console.error(e);
+    showErr("تعذر الحذف. تحققي من الصلاحيات.");
+  }
+});
+
+/** Export */
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  if(!allData.length){ showErr("لا توجد بيانات للتصدير."); return; }
+  const cols = Object.keys(allData[0]);
+  const lines = [cols.join(",")];
+  allData.forEach(x=>{
+    const row = cols.map(c => `"${String(x[c]??"").replaceAll('"','""')}"`);
+    lines.push(row.join(","));
+  });
+  const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "admin_view.csv"; a.click();
+  URL.revokeObjectURL(url);
+});
 
 /** Buttons */
 document.getElementById("loadBtn").addEventListener("click", loadFromSheet);
