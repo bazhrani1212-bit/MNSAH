@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة المديرة (Admin)</title>
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial; margin:0; background:#f6f7fb;}
+    header{background:#334155; color:#fff; padding:14px 12px;}
+    .wrap{max-width:1200px; margin:0 auto; padding:14px;}
+    .brand{display:flex; flex-direction:column; gap:6px;}
+    .brand h1{margin:0; font-size:18px; font-weight:900;}
+    .brand .sub{opacity:.95; font-size:13px; line-height:1.5;}
+    .card{background:#fff; border-radius:14px; padding:14px; box-shadow:0 1px 8px rgba(0,0,0,.06); margin:10px 0;}
+    .btn{border:0; background:#0f766e; color:#fff; padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:900}
+    .btn.gray{background:#475569}
+    .btn.danger{background:#b91c1c}
+    table{width:100%; border-collapse:collapse; font-size:13px}
+    th,td{border-bottom:1px solid #eef2f7; padding:10px; text-align:right; vertical-align:top}
+    th{background:#f1f5f9}
+    .hint{color:#64748b; font-size:12px}
+    input,select{padding:10px; border-radius:10px; border:1px solid #d0d7de; width:100%}
+    .row{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px}
+    @media(max-width:1100px){.row{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){.row{grid-template-columns:1fr}}
+    .ok{background:#ecfdf5; border:1px solid #10b981; color:#065f46; padding:10px; border-radius:12px; display:none}
+    .err{background:#fef2f2; border:1px solid #ef4444; color:#7f1d1d; padding:10px; border-radius:12px; display:none}
+    .hide{display:none!important;}
+    footer{padding:18px 12px; color:#64748b; font-size:12px; text-align:center}
+    .actions{display:flex; gap:8px; flex-wrap:wrap}
+    .tag{display:inline-block; padding:4px 10px; border-radius:999px; background:#e2e8f0; font-size:12px; margin:2px 4px 2px 0;}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1>لوحة المديرة (Admin) — منصة قياس الأثر ورضا المستفيد</h1>
+      <div class="sub">
+        المدرسة: <b>الابتدائية السادسة والثلاثون بالخميس</b> — مديرة المدرسة: <b>نورة الرفاعي</b><br>
+        لن تُعرض البيانات إلا بعد تسجيل الدخول ببريد المديرة.
+      </div>
+      <div class="hint" id="whoami" style="color:#cbd5e1;"></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="ok" id="okBox"></div>
+  <div class="err" id="errBox"></div>
+
+  <!-- Login -->
+  <div class="card" id="loginCard">
+    <h3 style="margin:0 0 8px;">تسجيل الدخول</h3>
+    <p class="hint">هذه الصفحة خاصة بالمديرة فقط.</p>
+
+    <div class="row">
+      <div>
+        <label class="hint">البريد الإلكتروني</label>
+        <input id="email" type="email" placeholder="principal@school.edu.sa" />
+      </div>
+      <div>
+        <label class="hint">كلمة المرور</label>
+        <input id="password" type="password" placeholder="********" />
+      </div>
+      <div style="display:flex; gap:10px; align-items:end">
+        <button class="btn" id="loginBtn">دخول</button>
+        <button class="btn gray" id="resetBtn">نسيت كلمة المرور</button>
+      </div>
+      <div style="display:flex; align-items:end">
+        <a class="btn gray" href="index.html">العودة للنماذج</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel -->
+  <div class="card hide" id="panelCard">
+    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center">
+      <div>
+        <strong>النتائج</strong>
+        <div class="hint">فلترة + تصدير + حذف (للمديرة فقط)</div>
+      </div>
+      <div class="actions">
+        <button class="btn gray" id="refreshBtn">تحديث</button>
+        <button class="btn" id="exportCsvBtn">تصدير CSV</button>
+        <button class="btn gray" id="logoutBtn">تسجيل خروج</button>
+      </div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #eef2f7; margin:14px 0;">
+
+    <div class="row">
+      <div>
+        <label class="hint">النوع</label>
+        <select id="typeFilter">
+          <option value="">الكل</option>
+          <option value="impact">قياس الأثر</option>
+          <option value="teacher_satisfaction">رضا المعلم</option>
+          <option value="student_school_satisfaction">رضا الطالب عن المدرسة</option>
+          <option value="parent_satisfaction">رضا ولي الأمر</option>
+          <option value="student_teacher_satisfaction">رضا الطالب عن المعلم</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="hint">المدرسة</label>
+        <select id="schoolFilter">
+          <option value="">الكل</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="hint">من تاريخ</label>
+        <input id="fromDate" type="date"/>
+      </div>
+
+      <div>
+        <label class="hint">بحث نصي</label>
+        <input id="searchText" placeholder="مثال: العلوم / برنامج / انضباط ..." />
+      </div>
+    </div>
+
+    <p class="hint">إذا لم تظهر البيانات، فالمشكلة غالبًا: Firebase config أو Firestore Rules أو البريد غير مطابق لبريد المديرة.</p>
+  </div>
+
+  <div class="card hide" id="tableCard">
+    <h3 style="margin:0 0 8px;">الاستجابات</h3>
+    <div class="hint" id="summaryLine">—</div>
+    <div style="overflow:auto; margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>النوع</th>
+            <th>التاريخ</th>
+            <th>المدرسة</th>
+            <th>مختصر</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer>تصميم/إعداد: بدرية الزهراني</footer>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<script>
+/** ✅ 1) اكتبي بريد المديرة الحقيقي هنا */
+const PRINCIPAL_EMAIL = "PRINCIPAL_EMAIL_HERE";
+
+/** ✅ 2) ضعي بيانات Firebase هنا بدل FIREBASE_CONFIG_HERE */
+const firebaseConfig = FIREBASE_CONFIG_HERE;
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/** UI messages */
+const okBox = document.getElementById('okBox');
+const errBox = document.getElementById('errBox');
+function showOk(msg){ okBox.textContent=msg; okBox.style.display='block'; errBox.style.display='none'; setTimeout(()=>okBox.style.display='none', 3500); }
+function showErr(msg){ errBox.textContent=msg; errBox.style.display='block'; okBox.style.display='none'; }
+
+const loginCard = document.getElementById('loginCard');
+const panelCard = document.getElementById('panelCard');
+const tableCard = document.getElementById('tableCard');
+const whoami = document.getElementById('whoami');
+
+const rowsEl = document.getElementById('rows');
+const summaryLine = document.getElementById('summaryLine');
+
+const typeFilter = document.getElementById('typeFilter');
+const schoolFilter = document.getElementById('schoolFilter');
+const fromDateEl = document.getElementById('fromDate');
+const searchTextEl = document.getElementById('searchText');
+
+let allData = [];
+let viewData = [];
+
+function fmtType(t){
+  const map = {
+    impact:"قياس الأثر",
+    teacher_satisfaction:"رضا المعلم",
+    student_school_satisfaction:"رضا الطالب عن المدرسة",
+    parent_satisfaction:"رضا ولي الأمر",
+    student_teacher_satisfaction:"رضا الطالب عن المعلم"
+  };
+  return map[t] || t;
+}
+function toISO(ts){
+  if(!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toISOString().slice(0,10);
+}
+function esc(s){ return (s??"").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+function countBy(arr, keyFn){
+  const m = new Map();
+  arr.forEach(x=>{
+    const k = keyFn(x);
+    m.set(k, (m.get(k)||0)+1);
+  });
+  return m;
+}
+
+function showAdminUI(user){
+  loginCard.classList.add('hide');
+  panelCard.classList.remove('hide');
+  tableCard.classList.remove('hide');
+  whoami.textContent = user ? `تم تسجيل الدخول: ${user.email}` : "";
+}
+function showLoginUI(){
+  loginCard.classList.remove('hide');
+  panelCard.classList.add('hide');
+  tableCard.classList.add('hide');
+  whoami.textContent = "";
+}
+
+function buildSchoolOptions(data){
+  const schools = [...new Set(data.map(x=> (x.school||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
+  const current = schoolFilter.value;
+  schoolFilter.innerHTML = `<option value="">الكل</option>` + schools.map(s=>`<option ${s===current?'selected':''}>${esc(s)}</option>`).join('');
+}
+
+async function loadAll(){
+  rowsEl.innerHTML = "";
+  summaryLine.textContent = "جارِ التحميل…";
+  try{
+    const snap = await db.collection('responses').orderBy('createdAt','desc').limit(1500).get();
+    allData = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    buildSchoolOptions(allData);
+    applyFilters();
+    showOk("تم تحديث البيانات ✅");
+  }catch(e){
+    console.error(e);
+    showErr("تعذر تحميل البيانات. تأكدي من Rules + تسجيل الدخول ببريد المديرة.");
+    summaryLine.textContent = "تعذر التحميل.";
+  }
+}
+
+function applyFilters(){
+  const t = typeFilter.value;
+  const s = (schoolFilter.value||"").trim();
+  const from = fromDateEl.value || "";
+  const q = (searchTextEl.value||"").trim().toLowerCase();
+
+  viewData = allData.filter(x=>{
+    if(t && x.type!==t) return false;
+    if(s && (x.school||"").trim()!==s) return false;
+    if(from){
+      const d = toISO(x.createdAt);
+      if(d && d < from) return false;
+    }
+    if(q){
+      const hay = JSON.stringify({
+        program:x.program, notes:x.notes, subject:x.subject,
+        positives:x.positives, challenges:x.challenges,
+        impactLevel:x.impactLevel, targets:x.targets, method:x.method
+      }).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  renderTable();
+}
+
+function rowBrief(x){
+  if(x.type==="impact"){
+    const tags = [
+      x.program ? `برنامج: ${x.program}` : null,
+      x.impactLevel ? `الأثر: ${x.impactLevel}` : null,
+      (x.effectPct!=null && x.effectPct!=="") ? `%الأثر: ${x.effectPct}` : null
+    ].filter(Boolean);
+    return tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  }else{
+    const answered = x.answers ? Object.values(x.answers).filter(Boolean).length : 0;
+    const tags = [`بنود مجابة: ${answered}`, x.subject?`مادة: ${x.subject}`:null].filter(Boolean);
+    return tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  }
+}
+
+function renderTable(){
+  summaryLine.textContent = `عدد النتائج: ${viewData.length}`;
+  rowsEl.innerHTML = viewData.slice(0,700).map(x=>{
+    return `<tr>
+      <td>${esc(fmtType(x.type))}</td>
+      <td>${esc(toISO(x.createdAt))}</td>
+      <td>${esc((x.school||"—").toString())}</td>
+      <td>${rowBrief(x)}</td>
+      <td>
+        <div class="actions">
+          <button class="btn danger" data-action="del" data-id="${esc(x.id)}">حذف</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  rowsEl.querySelectorAll('button[data-action="del"]').forEach(b=>{
+    b.addEventListener('click', ()=> deleteDoc(b.getAttribute('data-id')));
+  });
+}
+
+async function deleteDoc(id){
+  if(!confirm("هل أنتِ متأكدة من حذف هذه الاستجابة؟ لا يمكن التراجع.")) return;
+  try{
+    await db.collection('responses').doc(id).delete();
+    showOk("تم الحذف ✅");
+    await loadAll();
+  }catch(e){
+    console.error(e);
+    showErr("تعذر الحذف. تأكدي من Rules وصلاحيات المديرة.");
+  }
+}
+
+function exportCsv(){
+  const cols = ["id","type","createdAt","school","program","impactLevel","effectPct","goalPct","method","domain","targets","answers","notes"];
+  const lines = [cols.join(",")];
+
+  viewData.forEach(x=>{
+    const row = [
+      x.id||"",
+      x.type||"",
+      toISO(x.createdAt),
+      x.school||"",
+      x.program||"",
+      x.impactLevel||"",
+      x.effectPct??"",
+      x.goalPct??"",
+      x.method||"",
+      x.domain||"",
+      x.targets||"",
+      x.answers?JSON.stringify(x.answers).replaceAll('"','""'):"",
+      x.notes?x.notes.replaceAll('"','""'):""
+    ].map(v=> `"${(v??"").toString().replaceAll('"','""')}"`);
+    lines.push(row.join(","));
+  });
+
+  const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "responses_filtered.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Auth actions */
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const email = (document.getElementById('email').value||"").trim();
+  const password = document.getElementById('password').value||"";
+  try{
+    await auth.signInWithEmailAndPassword(email, password);
+    showOk("تم تسجيل الدخول ✅");
+  }catch(e){
+    console.error(e);
+    showErr("فشل تسجيل الدخول. تأكدي من البريد وكلمة المرور.");
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await auth.signOut(); });
+
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  const email = (document.getElementById('email').value||"").trim();
+  if(!email){ showErr("اكتبي البريد أولاً لإرسال رابط إعادة تعيين كلمة المرور."); return; }
+  try{
+    await auth.sendPasswordResetEmail(email);
+    showOk("تم إرسال رابط إعادة التعيين للبريد ✅");
+  }catch(e){
+    console.error(e);
+    showErr("تعذر إرسال رابط الاستعادة. تأكدي من البريد.");
+  }
+});
+
+document.getElementById('refreshBtn').addEventListener('click', loadAll);
+document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+
+[typeFilter, schoolFilter, fromDateEl, searchTextEl].forEach(el=>{
+  el.addEventListener('input', applyFilters);
+  el.addEventListener('change', applyFilters);
+});
+
+/** Auth gate */
+auth.onAuthStateChanged(async (user)=>{
+  if(!user){ showLoginUI(); return; }
+
+  if((user.email||"").toLowerCase() !== (PRINCIPAL_EMAIL||"").toLowerCase()){
+    showLoginUI();
+    showErr("تم تسجيل الدخول بحساب غير حساب المديرة. لا يمكن عرض النتائج.");
+    await auth.signOut();
+    return;
+  }
+
+  showAdminUI(user);
+  await loadAll();
+});
+</script>
+</body>
+</html>
