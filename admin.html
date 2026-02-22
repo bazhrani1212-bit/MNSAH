@@ -129,14 +129,10 @@
 </div>
 
 <script>
-/** رابط Web App (الجديد) */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwy098HrSJ1vqA_xNQQal3lCD6Z1-S0vi2Q8_XNVPKNH8B_TQZZiskueR99RwjGjncC/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjO88bOSAKDnI7xYwgrNsvmD3enY21tgarcB8cseO5BR-xitjjv81YNz-fqK-j7tTX/exec";
 
-/** SessionKey إلزامي */
 const sessionKey = localStorage.getItem("adminSessionKey") || "";
-if(!sessionKey){
-  window.location.href = "./";
-}
+if(!sessionKey){ window.location.href = "./"; }
 
 const okBox = document.getElementById("okBox");
 const errBox = document.getElementById("errBox");
@@ -271,7 +267,6 @@ function stats(){
   document.getElementById("st_avgGoalPct").textContent = avg(impacts,"goalPct");
 }
 
-/** Modal */
 const backdrop = document.getElementById("backdrop");
 const modalBody = document.getElementById("modalBody");
 const modalTitle = document.getElementById("modalTitle");
@@ -328,7 +323,6 @@ function closeModal(){
   currentItem = null;
 }
 
-/** Delete */
 deleteBtn.addEventListener("click", async ()=>{
   if(!currentItem?.id) return;
   if(!confirm("هل تريدين حذف هذه الاستجابة؟")) return;
@@ -352,7 +346,6 @@ deleteBtn.addEventListener("click", async ()=>{
   }
 });
 
-/** Export */
 document.getElementById("exportBtn").addEventListener("click", ()=>{
   if(!allData.length){ showErr("لا توجد بيانات للتصدير."); return; }
   const cols = Object.keys(allData[0]);
@@ -368,21 +361,16 @@ document.getElementById("exportBtn").addEventListener("click", ()=>{
   URL.revokeObjectURL(url);
 });
 
-/** Buttons */
 document.getElementById("loadBtn").addEventListener("click", loadFromSheet);
 document.getElementById("refreshBtn").addEventListener("click", loadFromSheet);
 
-document.getElementById("goHomeBtn").addEventListener("click", ()=>{
-  const base = location.origin + location.pathname.split("/").slice(0,-1).join("/") + "/";
-  window.location.href = base;
-});
+document.getElementById("goHomeBtn").addEventListener("click", ()=>{ window.location.href = "./"; });
 
 document.getElementById("logoutBtn").addEventListener("click", ()=>{
   localStorage.removeItem("adminSessionKey");
   window.location.href = "./";
 });
 
-/** Auto load */
 loadFromSheet();
 </script>
 </body>
